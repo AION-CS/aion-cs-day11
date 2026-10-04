@@ -3,7 +3,8 @@
 import { Bul, Diagram } from "@/components/materi/kit";
 import { ArchExample, CompProfile, DataStages, LiftCases, SourceGrid } from "@/components/materi/diagramsB";
 import { Callout, DataTable, MaterialCard } from "@/components/ui/MaterialCard";
-import { CASES_MIN, CRITERIA, LIFT_ACT, LIFT_WATCH, QUALITY_BAR } from "@/data/route2";
+import { ShowMore } from "@/components/ui/ShowMore";
+import { CASES_MIN, CRITERIA, LIFT_ACT, LIFT_WATCH, QUALITY_BAR, R2_MONTHS } from "@/data/route2";
 import { tt } from "@/lib/lang";
 
 /** Materi B: the five cards of Route 2 (Level 3). 60 minutes in all. */
@@ -23,12 +24,14 @@ export function CardB1() {
       ]}
       sources={["dixonadamson2011", "cialdini2006"]}
     >
-      <p className={p}>
-        {tt(
-          "Dixon and Adamson (2011) found that the salespeople who win complex deals teach the customer something about their own business, tailor it to each person in the buying group and take control of the conversation, rather than simply building a relationship. Cialdini (2006) shows that the principles of persuasion work reliably, and that using them without real proof destroys the trust they depend on.",
-          "Dixon und Adamson (2011) fanden, dass die Vertriebsleute, die komplexe Abschlüsse gewinnen, dem Kunden etwas über sein eigenes Geschäft beibringen, es auf jede Person der Einkaufsgruppe zuschneiden und das Gespräch führen, statt nur eine Beziehung aufzubauen. Cialdini (2006) zeigt, dass die Prinzipien der Überzeugung verlässlich wirken, und dass sie ohne echten Beleg das Vertrauen zerstören, auf dem sie beruhen.",
-        )}
-      </p>
+      <ShowMore id="B1" part="research" label={tt("Show the research behind this card", "Die Forschung hinter dieser Karte zeigen")}>
+        <p className={p}>
+          {tt(
+            "Dixon and Adamson (2011) found that the salespeople who win complex deals teach the customer something about their own business, tailor it to each person in the buying group and take control of the conversation, rather than simply building a relationship. Cialdini (2006) shows that the principles of persuasion work reliably, and that using them without real proof destroys the trust they depend on.",
+            "Dixon und Adamson (2011) fanden, dass die Vertriebsleute, die komplexe Abschlüsse gewinnen, dem Kunden etwas über sein eigenes Geschäft beibringen, es auf jede Person der Einkaufsgruppe zuschneiden und das Gespräch führen, statt nur eine Beziehung aufzubauen. Cialdini (2006) zeigt, dass die Prinzipien der Überzeugung verlässlich wirken, und dass sie ohne echten Beleg das Vertrauen zerstören, auf dem sie beruhen.",
+          )}
+        </p>
+      </ShowMore>
       <Diagram label={tt("Four stages towards an emotional sales strategy · a worked example on Neisse Systems", "Vier Stufen zu einer emotionalen Vertriebsstrategie · ein Beispiel mit Neisse Systems")} caption={tt("Click a stage and read what changes for the company at that stage.", "Klicken Sie eine Stufe an und lesen Sie, was sich auf dieser Stufe für das Unternehmen ändert.")}>
         <DataStages />
       </Diagram>
@@ -50,12 +53,14 @@ export function CardB2() {
       ]}
       sources={["green2000", "escalas2004"]}
     >
-      <p className={p}>
-        {tt(
-          "Green and Brock (2000) showed that people absorbed in a story accept its conclusions more readily, which is exactly why a story must be true: the listener checks less while listening and more afterwards. Escalas (2004) found that stories work when the listener can connect them to their own situation, so the approach must speak to a decision the customer actually faces.",
-          "Green und Brock (2000) zeigten, dass Menschen, die in eine Story eintauchen, ihre Schlüsse bereitwilliger annehmen, und genau darum muss eine Story wahr sein: Der Zuhörer prüft beim Zuhören weniger und danach mehr. Escalas (2004) fand, dass Storys wirken, wenn der Zuhörer sie mit seiner eigenen Lage verbinden kann, also muss der Ansatz eine Entscheidung ansprechen, vor der der Kunde tatsächlich steht.",
-        )}
-      </p>
+      <ShowMore id="B2" part="research" label={tt("Show the research behind this card", "Die Forschung hinter dieser Karte zeigen")}>
+        <p className={p}>
+          {tt(
+            "Green and Brock (2000) showed that people absorbed in a story accept its conclusions more readily, which is exactly why a story must be true: the listener checks less while listening and more afterwards. Escalas (2004) found that stories work when the listener can connect them to their own situation, so the approach must speak to a decision the customer actually faces.",
+            "Green und Brock (2000) zeigten, dass Menschen, die in eine Story eintauchen, ihre Schlüsse bereitwilliger annehmen, und genau darum muss eine Story wahr sein: Der Zuhörer prüft beim Zuhören weniger und danach mehr. Escalas (2004) fand, dass Storys wirken, wenn der Zuhörer sie mit seiner eigenen Lage verbinden kann, also muss der Ansatz eine Entscheidung ansprechen, vor der der Kunde tatsächlich steht.",
+          )}
+        </p>
+      </ShowMore>
       <Diagram label={tt("Neisse Systems' storytelling approaches, sorted by customer decision and backing", "Storytelling-Ansätze von Neisse Systems, nach Kundenentscheidung und Beleg sortiert")} caption={tt("Click an approach to read where it goes and why.", "Klicken Sie einen Ansatz an, um zu lesen, wohin er gehört und warum.")}>
         <SourceGrid />
       </Diagram>
@@ -77,12 +82,14 @@ export function CardB3() {
       ]}
       sources={["kaplan1992", "ries2011"]}
     >
-      <p className={p}>
-        {tt(
-          "Kaplan and Norton (1992) showed that managers steer better by a few linked measures, results and the drivers behind them, than by many unrelated ones. Ries (2011) warns against vanity metrics, numbers that rise whatever you do. In sales communication they are everywhere: presentations held, slides produced, likes on a story post.",
-          "Kaplan und Norton (1992) zeigten, dass Führungskräfte besser nach wenigen verbundenen Kennzahlen steuern, Ergebnissen und den Treibern dahinter, als nach vielen unverbundenen. Ries (2011) warnt vor Vanity Metrics, Zahlen, die steigen, egal was man tut. In der Vertriebskommunikation sind sie überall: gehaltene Präsentationen, erstellte Folien, Likes für einen Story-Post.",
-        )}
-      </p>
+      <ShowMore id="B3" part="research" label={tt("Show the research behind this card", "Die Forschung hinter dieser Karte zeigen")}>
+        <p className={p}>
+          {tt(
+            "Kaplan and Norton (1992) showed that managers steer better by a few linked measures, results and the drivers behind them, than by many unrelated ones. Ries (2011) warns against vanity metrics, numbers that rise whatever you do. In sales communication they are everywhere: presentations held, slides produced, likes on a story post.",
+            "Kaplan und Norton (1992) zeigten, dass Führungskräfte besser nach wenigen verbundenen Kennzahlen steuern, Ergebnissen und den Treibern dahinter, als nach vielen unverbundenen. Ries (2011) warnt vor Vanity Metrics, Zahlen, die steigen, egal was man tut. In der Vertriebskommunikation sind sie überall: gehaltene Präsentationen, erstellte Folien, Likes für einen Story-Post.",
+          )}
+        </p>
+      </ShowMore>
       <Diagram label={tt("Four KPI candidates of Neisse Systems on four tests", "Vier KPI-Kandidaten von Neisse Systems nach vier Tests")} caption={tt("Choose a candidate and compare its profile with the printed facts under it.", "Wählen Sie einen Kandidaten und vergleichen Sie sein Profil mit den gedruckten Fakten darunter.")}>
         <CompProfile />
       </Diagram>
@@ -105,24 +112,28 @@ export function CardB4() {
       ]}
       sources={["kohavi2020", "cialdini2006"]}
     >
-      <p className={p}>
-        {tt(
-          "Kohavi, Tang and Xu (2020) describe how firms that test continuously decide on each result with rules agreed before the test: a minimum effect worth shipping, a minimum sample, and guardrail metrics that veto a rollout. Cialdini (2006) explains why urgency and scarcity work in the short run, and why customers who notice they were pushed stop trusting the seller.",
-          "Kohavi, Tang und Xu (2020) beschreiben, wie Firmen, die laufend testen, über jedes Ergebnis mit Regeln entscheiden, die vor dem Test vereinbart sind: ein Mindesteffekt, der einen Rollout lohnt, eine Mindeststichprobe und Guardrail-Kennzahlen, die einen Rollout verhindern können. Cialdini (2006) erklärt, warum Dringlichkeit und Knappheit kurzfristig wirken, und warum Kunden, die merken, dass sie gedrängt wurden, dem Verkäufer nicht mehr trauen.",
-        )}
-      </p>
+      <ShowMore id="B4" part="research" label={tt("Show the research behind this card", "Die Forschung hinter dieser Karte zeigen")}>
+        <p className={p}>
+          {tt(
+            "Kohavi, Tang and Xu (2020) describe how firms that test continuously decide on each result with rules agreed before the test: a minimum effect worth shipping, a minimum sample, and guardrail metrics that veto a rollout. Cialdini (2006) explains why urgency and scarcity work in the short run, and why customers who notice they were pushed stop trusting the seller.",
+            "Kohavi, Tang und Xu (2020) beschreiben, wie Firmen, die laufend testen, über jedes Ergebnis mit Regeln entscheiden, die vor dem Test vereinbart sind: ein Mindesteffekt, der einen Rollout lohnt, eine Mindeststichprobe und Guardrail-Kennzahlen, die einen Rollout verhindern können. Cialdini (2006) erklärt, warum Dringlichkeit und Knappheit kurzfristig wirken, und warum Kunden, die merken, dass sie gedrängt wurden, dem Verkäufer nicht mehr trauen.",
+          )}
+        </p>
+      </ShowMore>
       <Diagram label={tt("Roll out, keep testing or stop · move the two sliders", "Ausrollen, weiter testen oder stoppen · die zwei Regler bewegen")} caption={tt("Set an uplift and a number of decisions and read which decision the rule gives.", "Stellen Sie einen Uplift und eine Zahl von Entscheidungen ein und lesen Sie, welche Entscheidung die Regel ergibt.")}>
         <LiftCases />
       </Diagram>
-      <DataTable
-        head={[tt("Neisse test", "Test bei Neisse"), tt("Uplift", "Uplift"), tt("Decisions", "Entscheidungen"), tt("Rule gives", "Regel ergibt"), tt("Who acts", "Wer handelt")]}
-        rows={[
-          [tt("A customer story told in the follow-up call", "Eine Kunden-Story im Nachgespräch"), "+34%", "140", tt("Roll out", "Ausrollen"), tt("Sales", "Vertrieb")],
-          [tt("A pilot offer for security-oriented customers", "Ein Pilotangebot für sicherheitsorientierte Kunden"), "+30%", "35", tt("Keep testing", "Weiter testen"), tt("Sales operations", "Sales Operations")],
-          [tt("A free gift with every signed offer", "Ein Geschenk zu jedem unterschriebenen Angebot"), "+1%", "600", tt("Stop", "Stoppen"), tt("No one", "Niemand")],
-        ]}
-        caption={tt("A worked decision on other tests (Case assumption)", "Eine Beispielentscheidung mit anderen Tests (Fallannahme)")}
-      />
+      <ShowMore id="B4" part="table" label={tt("Show the table: a worked decision on other tests (Case assumption)", "Tabelle zeigen: Eine Beispielentscheidung mit anderen Tests (Fallannahme)")}>
+        <DataTable
+          head={[tt("Neisse test", "Test bei Neisse"), tt("Uplift", "Uplift"), tt("Decisions", "Entscheidungen"), tt("Rule gives", "Regel ergibt"), tt("Who acts", "Wer handelt")]}
+          rows={[
+            [tt("A customer story told in the follow-up call", "Eine Kunden-Story im Nachgespräch"), "+34%", "140", tt("Roll out", "Ausrollen"), tt("Sales", "Vertrieb")],
+            [tt("A pilot offer for security-oriented customers", "Ein Pilotangebot für sicherheitsorientierte Kunden"), "+30%", "35", tt("Keep testing", "Weiter testen"), tt("Sales operations", "Sales Operations")],
+            [tt("A free gift with every signed offer", "Ein Geschenk zu jedem unterschriebenen Angebot"), "+1%", "600", tt("Stop", "Stoppen"), tt("No one", "Niemand")],
+          ]}
+          caption={tt("A worked decision on other tests (Case assumption)", "Eine Beispielentscheidung mit anderen Tests (Fallannahme)")}
+        />
+      </ShowMore>
     </MaterialCard>
   );
 }
@@ -131,31 +142,50 @@ export function CardB5() {
   return (
     <MaterialCard
       id="B5"
-      scan={tt("A communication decision under unclear customer reactions is made in stages: change the conversations now where the approach is backed and the customer type is clear, measure from the first day, and agree on the result that makes you change course. The measures architecture gives every funded item a start, one owner and a trigger.", "Eine Kommunikationsentscheidung bei unklaren Kundenreaktionen fällt in Stufen: die Gespräche jetzt dort ändern, wo der Ansatz belegt und der Kundentyp klar ist, ab dem ersten Tag messen und das Ergebnis vereinbaren, bei dem Sie den Kurs ändern. Die Maßnahmenarchitektur gibt jedem finanzierten Punkt einen Start, einen Owner und einen Trigger.")}
+      scan={tt(`An architecture is built in order: the base first (the approved stories and the KPIs), then the people and the proof, then the claims, then the story tools on backed claims, and the rest held back. Four tests tell you whether it holds, and with four months the time test matters. Decide now, pilot in stages, and say what you will watch and when you would stop.`, `Eine Architektur wird der Reihe nach gebaut: zuerst die Basis (die freigegebenen Storys und die KPIs), dann die Menschen und der Beleg, dann die Aussagen, dann die Story-Tools auf belegten Aussagen, und der Rest wird zurückgehalten. Vier Tests sagen Ihnen, ob sie hält, und bei vier Monaten zählt der Zeittest. Entscheiden Sie jetzt, pilotieren Sie in Stufen, und sagen Sie, was Sie beobachten und wann Sie aufhören würden.`)}
       reasoning={[
-        tt("Waiting for a survey of what convinces customers is also a decision: customers rarely say what convinces them, they show it in how they decide, and every month of waiting the offers keep looking interchangeable. The brief asks for a decision despite unclear customer reactions.", "Auf eine Befragung zu warten, was Kunden überzeugt, ist auch eine Entscheidung: Kunden sagen selten, was sie überzeugt, sie zeigen es darin, wie sie entscheiden, und in jedem Monat des Wartens wirken die Angebote weiter austauschbar. Der Auftrag verlangt eine Entscheidung trotz unklarer Kundenreaktionen."),
-        tt("Switching every conversation at once feels decisive, but if a story misfires with one customer type it misfires in every meeting, and nothing is measured before the switch. Staging changes real conversations within weeks and learns how each type reacts.", "Jedes Gespräch auf einmal umzustellen fühlt sich entschlossen an, aber geht eine Story bei einem Kundentyp daneben, dann in jedem Gespräch, und vor der Umstellung wird nichts gemessen. Stufenweise ändern sich echte Gespräche innerhalb von Wochen, und man lernt, wie jeder Typ reagiert."),
-        tt("The stories first: the approved story library starts no later than the first other item, because the guides and the training tell these stories and the KPIs measure them.", "Die Storys zuerst: Die freigegebene Story-Bibliothek startet nicht später als der erste andere Punkt, weil die Leitfäden und das Training diese Storys erzählen und die KPIs sie messen."),
-        tt("Fund inside the budget, and fund nothing nobody at the company can check: a tool that writes stories by itself without showing its sources cannot be kept credible.", "Finanzieren Sie innerhalb des Budgets, und nichts, was im Unternehmen niemand prüfen kann: Ein Werkzeug, das Storys selbst schreibt, ohne seine Quellen zu zeigen, lässt sich nicht glaubwürdig halten."),
-        tt("Owner test: who can change the item without asking anyone else? Trigger test: a metric, a number, a date and an action.", "Owner-Test: Wer kann den Punkt ändern, ohne jemanden zu fragen? Trigger-Test: eine Kennzahl, eine Zahl, ein Datum und eine Aktion."),
-        tt("A tripwire measures how customers behave (the close rate, customers who can repeat the benefit), not your own output (slides, calls, stories produced), and its threshold is better than today.", "Ein Tripwire misst, wie Kunden sich verhalten (die Abschlussquote, Kunden, die den Nutzen wiedergeben können), nicht Ihren eigenen Output (Folien, Anrufe, produzierte Storys), und sein Schwellenwert ist besser als heute."),
-        tt("When meetings improve and deals lag, check whether the close rate moved where the change was made, whether the base is large enough and whether a guardrail was hit, before you change the plan; do not stop what works, and do not buy what cannot be checked.", "Wenn die Gespräche besser werden und die Abschlüsse hinterherhinken, prüfen Sie, ob sich die Abschlussquote dort bewegte, wo die Änderung gemacht wurde, ob die Basis groß genug ist und ob eine Guardrail verletzt wurde, bevor Sie den Plan ändern; stoppen Sie nicht, was wirkt, und kaufen Sie nichts, was sich nicht prüfen lässt."),
+        tt(`Build in this order. The base first: the approved story library and KPIs, so every conversation draws on stories the customers approved. Then the people and the proof: the reference programme so customers confirm the stories on a call, the story field in the CRM with a monthly review, and the proof pack for cautious customers. Then check the claims a story tool tells. Then the story tools that move a named KPI, on claims that are backed. Hold back the rest.`, `Bauen Sie in dieser Reihenfolge. Zuerst die Basis: freigegebene Story-Bibliothek und KPIs, damit jedes Gespräch auf Storys zurückgreift, die die Kunden freigegeben haben. Dann die Menschen und der Beleg: das Referenzkundenprogramm, damit Kunden die Storys in einem Gespräch bestätigen, das Story-Feld im CRM mit einem monatlichen Review und das Beleg-Paket für vorsichtige Kunden. Dann die Aussagen prüfen, die ein Story-Tool erzählt. Dann die Story-Tools, die einen benannten KPI bewegen, auf Aussagen, die belegt sind. Den Rest halten Sie zurück.`),
+        tt(`Four tests check an architecture. The stories come first: the library and KPIs start no later than the first story tool. Every funded item has a purpose: it moves a named KPI or makes one measurable; a tool that writes stories by itself without showing its sources, and an image campaign that names no KPI, do neither. Claims backed: a story tool starts on claims of which at least ${QUALITY_BAR}% are backed by a real, approved customer case. It fits: inside the budget and in use by month ${R2_MONTHS}.`, `Vier Tests prüfen eine Architektur. Die Storys kommen zuerst: Bibliothek und KPIs starten nicht später als das erste Story-Tool. Jeder finanzierte Punkt hat einen Zweck: Er bewegt einen benannten KPI oder macht einen messbar; ein Werkzeug, das Storys selbst schreibt, ohne seine Quellen zu zeigen, und eine Imagekampagne, die keinen KPI nennt, tun keines von beidem. Aussagen belegt: Ein Story-Tool startet auf Aussagen, von denen mindestens ${QUALITY_BAR} % durch einen echten, freigegebenen Kundenfall belegt sind. Es passt: innerhalb des Budgets und bis Monat ${R2_MONTHS} im Einsatz.`),
+        tt(`Time: an item is in use in the month = start + weeks ÷ 4, rounded up. A Now item starts in month 1; an After the proof is ready item starts in the month the reference programme is in use, so the programme has to be Now itself: a customer who confirms the story on a call is what backs the claim. With ${R2_MONTHS} months, an item of 14 or 16 weeks is in use only in month 5.`, `Zeit: Ein Punkt ist im Monat = Start + Wochen ÷ 4, aufgerundet, im Einsatz. Ein Jetzt-Punkt startet in Monat 1; ein Punkt „Wenn der Beleg bereit ist“ startet in dem Monat, in dem das Referenzkundenprogramm im Einsatz ist, das Programm muss also selbst auf Jetzt stehen: Ein Kunde, der die Story in einem Gespräch bestätigt, belegt die Aussage. Bei ${R2_MONTHS} Monaten ist ein Punkt mit 14 oder 16 Wochen erst in Monat 5 im Einsatz.`),
+        tt(`Three bars show where the money sits: Budget (the money against the limit), Measurable (the share on items that are measured, whose claims are backed and that are in use within the ${R2_MONTHS} months) and Risk (the share on a black box, on claims below ${QUALITY_BAR}% backed or on an item in use only after the ${R2_MONTHS} months). Measurable and Risk are ranges, because the backing may be weaker than the brief says: a plan that holds at both ends is the safer one.`, `Drei Balken zeigen, wo das Geld liegt: Budget (das Geld gegen die Grenze), Messbar (der Anteil auf Punkten, die gemessen werden, deren Aussagen belegt sind und die innerhalb der ${R2_MONTHS} Monate im Einsatz sind) und Risiko (der Anteil auf einer Black Box, auf Aussagen unter ${QUALITY_BAR} % belegt oder auf einem Punkt, der erst nach den ${R2_MONTHS} Monaten im Einsatz ist). Messbar und Risiko sind Spannen, weil der Beleg schwächer sein kann, als der Auftrag sagt: Ein Plan, der an beiden Enden hält, ist der sicherere.`),
+        tt(`Waiting for a customer survey is also a decision: customers rarely say what convinces them, they show it in real conversations, and every month of waiting the offers keep looking interchangeable. The brief asks for a decision despite unclear customer reactions.`, `Auf eine Kundenbefragung zu warten ist auch eine Entscheidung: Kunden sagen selten, was sie überzeugt, sie zeigen es in echten Gesprächen, und in jedem Monat des Wartens wirken die Angebote weiter austauschbar. Der Auftrag verlangt eine Entscheidung trotz unklarer Kundenreaktionen.`),
+        tt(`Switching every conversation at once feels decisive, but a story that misfires with one customer type misfires in every meeting, and nothing is measured before the switch. Piloting with two types changes real conversations within weeks and learns how each type reacts.`, `Jedes Gespräch auf einmal umzustellen fühlt sich entschlossen an, aber geht eine Story bei einem Kundentyp daneben, dann in jedem Gespräch, und vor der Umstellung wird nichts gemessen. Mit zwei Typen zu pilotieren ändert innerhalb von Wochen echte Gespräche und zeigt, wie jeder Typ reagiert.`),
+        tt(`Fund inside the budget, and fund nothing nobody at the company can check: a tool that writes stories by itself without showing its sources cannot be kept credible. A celebrity testimonial adds a famous face but no customer's own story.`, `Finanzieren Sie innerhalb des Budgets, und nichts, was im Unternehmen niemand prüfen kann: Ein Werkzeug, das Storys selbst schreibt, ohne seine Quellen zu zeigen, lässt sich nicht glaubwürdig halten. Ein prominentes Testimonial bringt ein bekanntes Gesicht, aber keine eigene Story eines Kunden.`),
+        tt(`What you will watch is one figure about customers (the close rate of offers, the share of customers who can repeat the benefit), not your own output (slides, calls, stories produced), the month it can first be read, and what you do if it falls short: stop, pause or change one thing.`, `Was Sie beobachten, ist eine Zahl über Kunden (die Abschlussquote der Angebote, der Anteil der Kunden, die den Nutzen wiedergeben können), nicht Ihr eigener Output (Folien, Anrufe, produzierte Storys), der Monat, in dem sie sich zuerst lesen lässt, und was Sie tun, wenn sie zu kurz greift: stoppen, pausieren oder eine Sache ändern.`),
+        tt(`Every plan gives something and costs something. Say what it gives (measured, backed, inside the budget and the months) and what it leaves open (an item not now, claims below 80% backed if the backing is weaker, budget left unspent). A plan that differs from this order can still be argued: say why.`, `Jeder Plan gibt etwas und kostet etwas. Sagen Sie, was er gibt (gemessen, belegt, innerhalb von Budget und Monaten) und was er offen lässt (ein Punkt, der jetzt nicht kommt, Aussagen unter 80 % belegt, wenn der Beleg schwächer ist, ungenutztes Budget). Ein Plan, der von dieser Reihenfolge abweicht, lässt sich trotzdem vertreten: Sagen Sie, warum.`),
       ]}
       sources={["courtney1997", "klein2007"]}
     >
-      <Diagram label={tt("Three funded items over four months · a worked example on Neisse Systems", "Drei finanzierte Punkte über vier Monate · ein Beispiel mit Neisse Systems")} caption={tt("Click a row to read its owner, its trigger and why it starts when it does.", "Klicken Sie eine Zeile an, um Owner, Trigger und den Grund für den Start zu lesen.")}>
+      <Diagram label={tt(`A story guide and its base · a worked example on Neisse Systems`, `Ein Story-Leitfaden und seine Basis · ein Beispiel mit Neisse Systems`)} caption={tt(`Change when the approved stories start and how well the claims are backed, and watch the links.`, `Ändern Sie, wann die freigegebenen Storys starten und wie gut die Aussagen belegt sind, und beobachten Sie die Verbindungen.`)}>
         <ArchExample />
       </Diagram>
-      <Bul
-        items={[
-          tt("Stage it: the no-regret items (the approved stories, the story field in the CRM) first, the training and the approaches for the other customer types when there is something to spread.", "Stufenweise: die No-regret-Punkte (die freigegebenen Storys, das Story-Feld im CRM) zuerst, das Training und die Ansätze für die anderen Kundentypen, wenn es etwas zu verbreiten gibt."),
-          tt("Premortem: imagine the strategy failed after four months, and write down why. Those reasons are your assumptions to watch.", "Premortem: Stellen Sie sich vor, die Strategie sei nach vier Monaten gescheitert, und schreiben Sie auf, warum. Diese Gründe sind die Annahmen, die Sie beobachten."),
-          tt("What does not fit gets a pickup point: the number and the date at which you look at it again.", "Was nicht passt, bekommt einen Pickup Point: die Zahl und das Datum, zu dem Sie es wieder ansehen."),
-        ]}
-      />
-      <Callout label={tt("Unclear reactions are not a reason to bet everything, or nothing", "Unklare Reaktionen sind kein Grund, alles oder nichts zu setzen")} tone="signal">
-        <p>{tt("Courtney, Kirkland and Viguerie (1997) advise matching the commitment to what is known: no-regret moves now, options that can be scaled later, and big bets only when the evidence is in. Klein (2007) adds the premortem, a short exercise that makes a team name the risks it would otherwise keep to itself.", "Courtney, Kirkland und Viguerie (1997) raten, die Festlegung an das Bekannte anzupassen: No-regret-Schritte jetzt, Optionen, die sich später ausweiten lassen, und große Wetten erst, wenn die Evidenz da ist. Klein (2007) ergänzt das Premortem, eine kurze Übung, die ein Team die Risiken nennen lässt, die es sonst für sich behielte.")}</p>
-      </Callout>
+      <ShowMore id="B5" part="calc" label={tt("Show the worked numbers on another company (Case assumption)", "Die Rechenwege an einem anderen Unternehmen zeigen (Fallannahme)")}>
+        <DataTable
+          head={[tt("Rule", "Regel"), tt("Neisse's figures", "Zahlen von Neisse"), tt("Result", "Ergebnis")]}
+          rows={[
+            [tt(`Month in use: starts in month 1, needs 6 weeks`, `Monat im Einsatz: startet in Monat 1, braucht 6 Wochen`), "1 + 6 ÷ 4 = 1 + 2", tt(`month 3`, `Monat 3`)],
+            [tt(`After the proof is ready: the reference programme is in use in month 2, the item needs 8 weeks`, `Wenn der Beleg bereit ist: Das Referenzkundenprogramm ist in Monat 2 im Einsatz, der Punkt braucht 8 Wochen`), "2 + 8 ÷ 4 = 2 + 2", tt(`starts month 2, in use month 4`, `Start Monat 2, im Einsatz Monat 4`)],
+            [tt(`Time: a tool of 14 weeks that starts in month 1, in a plan of 4 months`, `Zeit: ein Werkzeug mit 14 Wochen, das in Monat 1 startet, in einem Plan von 4 Monaten`), "1 + 14 ÷ 4 = 1 + 4", tt(`month 5: too late`, `Monat 5: zu spät`)],
+            [tt(`Claims backed: the guide's claims are 90% backed, the bar is 80%`, `Aussagen belegt: Die Aussagen des Leitfadens sind zu 90 % belegt, die Grenze ist 80 %`), "90 ≥ 80", tt(`ready`, `bereit`)],
+            [tt(`The same guide when the backing is 15 points weaker`, `Derselbe Leitfaden, wenn der Beleg 15 Punkte schwächer ist`), "90 − 15 = 75 < 80", tt(`not ready`, `nicht bereit`)],
+            [tt(`Money: three funded items against Neisse's €100,000`, `Geld: drei finanzierte Punkte gegen Neisses 100.000 €`), "30,000 + 25,000 + 15,000", tt(`€70,000, €30,000 left`, `70.000 €, 30.000 € übrig`)],
+          ]}
+          caption={tt(`Neisse's numbers (Case assumption). The panel in the task does this for you and says what it means.`, `Zahlen von Neisse (Fallannahme). Das Panel in der Aufgabe macht das für Sie und sagt, was es bedeutet.`)}
+        />
+      </ShowMore>
+      <ShowMore id="B5" part="notes" label={tt("Show two short notes", "Zwei kurze Hinweise zeigen")}>
+        <Bul
+          items={[
+            tt(`Stage it: the no-regret items first (the approved stories, the story field in the CRM), the story tools that need more backing when the reference programme is in use.`, `Stufenweise: die No-regret-Punkte zuerst (die freigegebenen Storys, das Story-Feld im CRM), die Story-Tools, die mehr Beleg brauchen, wenn das Referenzkundenprogramm im Einsatz ist.`),
+            tt(`Premortem: imagine the strategy failed after four months, and write down why. Those reasons are what you watch.`, `Premortem: Stellen Sie sich vor, die Strategie sei nach vier Monaten gescheitert, und schreiben Sie auf, warum. Diese Gründe beobachten Sie.`),
+          ]}
+        />
+      </ShowMore>
+      <ShowMore id="B5" part="extra" label={tt("Show: Unclear reactions are not a reason to bet everything, or nothing", "Zeigen: Unklare Reaktionen sind kein Grund, alles oder nichts zu setzen")}>
+        <Callout label={tt("Unclear reactions are not a reason to bet everything, or nothing", "Unklare Reaktionen sind kein Grund, alles oder nichts zu setzen")} tone="signal">
+          <p>{tt(`Courtney, Kirkland and Viguerie (1997) advise matching the commitment to what is known: no-regret moves now, options that can be scaled later, and big bets only when the evidence is in. Klein (2007) adds the premortem, a short exercise that makes a team name the risks it would otherwise keep to itself.`, `Courtney, Kirkland und Viguerie (1997) raten, die Festlegung an das Bekannte anzupassen: No-regret-Schritte jetzt, Optionen, die sich später ausweiten lassen, und große Wetten erst, wenn die Evidenz da ist. Klein (2007) ergänzt das Premortem, eine kurze Übung, die ein Team die Risiken nennen lässt, die es sonst für sich behielte.`)}</p>
+        </Callout>
+      </ShowMore>
     </MaterialCard>
   );
 }

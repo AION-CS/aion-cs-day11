@@ -1,11 +1,12 @@
-import { FORECAST, PILOT } from "@/data/forecast";
-import type { FigureId } from "@/data/forecast";
 import { BUDGET, JOINS_LABEL, MEASURE_BY_ID, MODEL_COST, MODEL_MEASURES, PROBLEM_LABEL, explainBucket, modelScore } from "@/data/measures";
 import type { MeasureId } from "@/data/measures";
 import { KEY_L1, KEY_R2 } from "@/data/mentorKey";
-import { ARCH_BY_ID, COMP_BY_ID, MODEL_ARCH, MODEL_GREATEST, MODEL_TRIGGER, OWNERS, OWNER_ACCEPT, PRINCIPLES, R2_BUDGET } from "@/data/route2";
-import type { ArchId, PrincipleId } from "@/data/route2";
-import { euro } from "@/lib/lang";
+import { ARCH_BY_ID, ARCH_IDS, COMP_BY_ID, MODEL_GREATEST, PRINCIPLES, R2_BUDGET, R2_MONTHS } from "@/data/route2";
+import type { PrincipleId } from "@/data/route2";
+import { MODEL_TIER, PANEL, READY_BAR } from "@/data/route2Panel";
+import type { Tier } from "@/data/route2Panel";
+import { euro, tt } from "@/lib/lang";
+import { inUseOf, monthsOf, planOf, rangeOf } from "@/lib/r2Panel";
 
 /**
  * Mentor-only worked answers for every task question the answer keys (lib/answerKey.ts) do not already cover: the numeric fields,
@@ -15,10 +16,9 @@ import { euro } from "@/lib/lang";
  * (CLAUDE.md #32); the model answers quoted follow the site's language, because the fill enters them in that language.
  */
 export type WorkedStep = { label: string; calc: string; result: string };
-export type MentorGuide = { title: string; answer: string; steps?: WorkedStep[]; why?: string; lookFor?: string[]; pitfalls?: string[] };
+export type MentorGuide = { title: string; answer: string; example?: string; steps?: WorkedStep[]; why?: string; lookFor?: string[]; pitfalls?: string[] };
 
 const n = (v: number) => (Math.round(v * 100) / 100).toLocaleString("en-US");
-const n3 = (v: number) => (Math.round(v * 1000) / 1000).toLocaleString("en-US");
 const L1 = () => KEY_L1();
 const R2 = () => KEY_R2();
 
@@ -34,51 +34,12 @@ export function extraInsightGuide(): MentorGuide {
   };
 }
 
-export function figureGuide(id: FigureId): MentorGuide {
-  const v = PILOT.variant;
-  const c = PILOT.control;
-  if (id === "F1")
-    return {
-      title: "1.2 · F1 Close rate with benefit and story",
-      answer: n(FORECAST.f1),
-      steps: [
-        { label: "Deals ÷ offers", calc: `${v.orders} ÷ ${v.sent}`, result: n(v.orders / v.sent) },
-        { label: "× 100", calc: `${n(v.orders / v.sent)} × 100`, result: `${n(FORECAST.f1)}%` },
-      ],
-      why: "Both numbers come from the rows with benefit and story: of 200 offers, 44 became deals.",
-      pitfalls: [`Share left as a fraction (0.22 instead of 22): ${n(v.orders / v.sent)}.`, `Technical rows used: ${n(FORECAST.controlRate)}.`, `All deals over all offers: ${n(((v.orders + c.orders) / (v.sent + c.sent)) * 100)}.`],
-    };
-  if (id === "F2")
-    return {
-      title: "1.2 · F2 Lift",
-      answer: n(FORECAST.f2),
-      steps: [
-        { label: "Technical close rate", calc: `${c.orders} ÷ ${c.sent} × 100`, result: `${n(FORECAST.controlRate)}%` },
-        { label: "Lift = F1 ÷ that rate", calc: `${n(FORECAST.f1)} ÷ ${n(FORECAST.controlRate)}`, result: n(FORECAST.f2) },
-      ],
-      why: "Offers with the benefit and a story closed 2.2 times as often as technical ones.",
-      pitfalls: [`Subtracted instead of divided (22 − 10): ${n(FORECAST.f1 - FORECAST.controlRate)}.`, `Divided the deals (44 ÷ 50): ${n(44 / 50)} — the groups are not the same size, so the counts must become rates first.`, `Divided the offers (500 ÷ 200): 2.5.`],
-    };
-  const diff = (FORECAST.f1 - FORECAST.controlRate) / 100;
-  return {
-    title: "1.2 · F3 Extra revenue a year",
-    answer: n(FORECAST.f3),
-    steps: [
-      { label: "Difference between the two rates, as a share of one", calc: `(${n(FORECAST.f1)} − ${n(FORECAST.controlRate)}) ÷ 100`, result: n3(diff) },
-      { label: "Extra deals a year", calc: `${n(PILOT.yearly)} × ${n3(diff)}`, result: n(PILOT.yearly * diff) },
-      { label: "× average deal value", calc: `${n(PILOT.yearly * diff)} × ${n(PILOT.order)}`, result: euro(FORECAST.f3) },
-    ],
-    why: "Only the deals the story adds on top of technical offers are extra: 108 more deals a year at €5,000 each.",
-    pitfalls: [`All deals at the story rate counted as extra (900 × 0.22 × 5,000): ${n(PILOT.yearly * 0.22 * PILOT.order)}.`, `Difference not turned into a share (900 × 12 × 5,000): ${n(PILOT.yearly * 12 * PILOT.order)}.`, `Last year's 200 story offers used instead of a year's 900: ${n(200 * diff * PILOT.order)}.`],
-  };
-}
-
 export function meaningGuide(): MentorGuide {
   return {
     title: "1.2 · What a customer story means",
     answer: L1().meaning ?? "",
-    lookFor: ["At least one of the learner's own figures (22%, 2.2 times, €540,000, or 10%).", "What to change first: open every offer with the benefit and a matching story.", "Said as an estimate: salespeople may have told stories mainly to warm prospects."],
-    pitfalls: ["A sentence with no figure: the app asks for one.", "“Stories make €540,000”: the figures are not a fair test yet."],
+    lookFor: ["At least one printed figure (10%, 22%, 2.2 times, or the 50 and 44 deals).", "What to do next: test a story opening fairly before telling every offer to start with a story.", "Said as an estimate: salespeople may have told stories only in the offers they expected to win."],
+    pitfalls: ["A sentence with no figure: the app asks for one.", "“Stories more than double our close rate”: salespeople chose which offers got a story, so it is a hint, not proof."],
   };
 }
 
@@ -109,8 +70,9 @@ export function reflectGuide(k: "interpret" | "causation" | "decider"): MentorGu
 
 export function misreadGuide(): MentorGuide {
   return {
-    title: "2.2 · Your three KPIs",
+    title: "2.1 · Your three KPIs",
     answer: L1().misread ?? "",
+    example: tt("Company A (a software reseller) steers its sales conversations by three KPIs. Close rate of offers, from the CRM, aim: up. It is the result sales is paid for, so it is the outcome. Share of first meetings that lead to a second one, from the CRM, aim: up. Prospects do it before they sign and the team can move it this month, so it is the driver. Customers who say they were promised something the product cannot do, from the follow-up call, aim: stay under a limit. If it rises we stop, so it is the guardrail. Choose yours from SalesTech's twelve metrics.", "Unternehmen A (ein Software-Reseller) steuert seine Verkaufsgespräche mit drei KPIs. Abschlussquote der Angebote, aus dem CRM, Ziel: hoch. Es ist das Ergebnis, für das der Vertrieb bezahlt wird, also der Outcome. Anteil der Erstgespräche, die zu einem zweiten führen, aus dem CRM, Ziel: hoch. Interessenten tun es, bevor sie unterschreiben, und das Team kann es in diesem Monat bewegen, also der Treiber. Kunden, die sagen, ihnen sei etwas versprochen worden, das das Produkt nicht kann, aus dem Nachgespräch, Ziel: unter einer Grenze bleiben. Steigt er, stoppen wir, also die Guardrail. Wählen Sie Ihre aus den zwölf Kennzahlen von SalesTech."),
     lookFor: ["At least one outcome KPI (close rate, revenue from new customers, renewals).", "At least one driver KPI (offers with a story, second meetings, customers who can repeat the benefit).", "For each: where the number comes from and a target; a guardrail (promises the product cannot keep) as the third is a strong answer."],
     pitfalls: ["Slides, calls or brochures as a KPI: vanity metrics, they count SalesTech's activity.", "Only outcomes: the team has nothing it can move this month."],
   };
@@ -121,6 +83,7 @@ export function abGuide(): MentorGuide {
   return {
     title: "2.3 · Hypothesis and decision rule",
     answer: k ? `${k.hyp} · ${k.rule}` : "",
+    example: tt("Company A tests a story opening. Hypothesis: if every offer to a bakery chain opens with a one-paragraph story of another bakery chain instead of a feature list, then the close rate rises, because the buyer sees a firm like theirs. Rule, written before the start: roll out if the close rate is at least 8% above the control group with 80 deals per group and complaints stay under 2%; keep testing between 3% and 8%; stop below 3%. Write yours for SalesTech's test card.", "Unternehmen A testet einen Story-Einstieg. Hypothese: Wenn jedes Angebot an eine Bäckereikette mit einem Absatz über eine andere Bäckereikette statt mit einer Feature-Liste beginnt, dann steigt die Abschlussquote, weil der Käufer eine Firma wie seine sieht. Regel, vor dem Start geschrieben: ausrollen, wenn die Abschlussquote bei 80 Abschlüssen pro Gruppe mindestens 8 % über der Kontrollgruppe liegt und die Beschwerden unter 2 % bleiben; weiter testen zwischen 3 % und 8 %; stoppen unter 3 %. Schreiben Sie Ihre für die Testkarte von SalesTech."),
     lookFor: ["Hypothesis: one change, the KPI expected to move, and a reason (“because …”).", "Decision rule written before the test: a threshold to roll out, a band to keep testing, a point to stop.", "A guardrail in the rule (stories called exaggerated, complaints about pressure)."],
     pitfalls: ["“The story will convince”: no KPI, no reason.", "A rule without numbers, or one decided after looking at the result."],
   };
@@ -136,7 +99,7 @@ export function scoreGuide(id: MeasureId): MentorGuide {
       { label: "Comprehensibility from what the customer hears (A7)", calc: `the customer hears ${JOINS_LABEL[m.joins]} → a story: 3 · the benefit: 2 · features or price: 1`, result: String(e) },
       { label: "Score = Effect × Comprehensibility × Persuasiveness", calc: `${m.model.effect} × ${e} × ${m.model.feasibility}`, result: String(modelScore(id)) },
     ],
-    why: `${m.model.note} Answers: ${m.targets.length ? m.targets.map((t) => PROBLEM_LABEL[t]).join(", ") : "none of the three problems"}.`,
+    why: `${m.model.note} Answers: ${m.targets.length ? m.targets.map((t) => PROBLEM_LABEL[t]).join(", ") : "none of the three problems"}. A different, well-reasoned effect or scalability score is acceptable: only the score that follows a printed rule is checked.`,
     pitfalls:
       id === "aipitch"
         ? ["Persuasiveness 3 “because it is personal”: generic claims and invented details are not credible: 1."]
@@ -148,10 +111,23 @@ export function scoreGuide(id: MeasureId): MentorGuide {
   };
 }
 
+/** The reason a learner gives for a measure's two judged scores (CLAUDE.md #45). The mentor's answer is the measure's own model note. */
+export function reasonGuide(id: MeasureId): MentorGuide {
+  const m = MEASURE_BY_ID[id];
+  return {
+    title: `2.4 · Why ${m.name} gets its effect and persuasiveness scores`,
+    answer: `Effect ${m.model.effect}, persuasiveness ${m.model.feasibility}: ${m.model.note}`,
+    example: tt("Company A's “a reference call with a customer of the same industry”: effect 3, because the buyer hears from someone like them before deciding; persuasiveness 3, because it is a real customer speaking, not the seller. Give your own reason for each score, with a fact printed on the card.", "Der „Referenzanruf bei einem Kunden derselben Branche“ von Unternehmen A: Wirkung 3, weil der Käufer vor der Entscheidung von jemandem hört, der ihm gleicht; Überzeugungskraft 3, weil ein echter Kunde spricht, nicht der Verkäufer. Geben Sie für jeden Wert Ihren eigenen Grund an, mit einer auf der Karte gedruckten Tatsache."),
+    why: "Effect and persuasiveness are judgements; a different score with a clear reason is as good as the model. The reason should name what changes for the buyer (effect) and why a buyer would believe it (persuasiveness).",
+    lookFor: ["Effect: what the buyer hears or does differently because of the measure.", "Persuasiveness: why a buyer would believe it: a real case, a named customer, a proof.", "A fact from the card, not only “it is good”."],
+  };
+}
+
 export function whyGuide(): MentorGuide {
   return {
     title: "2.4 · Why the first priority goes first",
     answer: L1().why ?? "",
+    example: tt("Company A puts its customer-story library first: it scores 18 and it answers the problem that buyers do not understand the benefit. The conversation guides come second and start alongside it. Together they cost €45,000 of the €60,000. The feature brochure stays out: it scores 4 and tells buyers only what the product can do. Make the same three statements about your own measures.", "Unternehmen A setzt seine Bibliothek aus Kunden-Storys an die erste Stelle: Sie erzielt 18 und beantwortet das Problem, dass Käufer den Nutzen nicht verstehen. Die Gesprächsleitfäden kommen zweite und starten gleichzeitig. Zusammen kosten sie 45.000 € von 60.000 €. Die Feature-Broschüre bleibt draußen: Sie erzielt 4 und sagt Käufern nur, was das Produkt kann. Machen Sie dieselben drei Aussagen über Ihre eigenen Maßnahmen."),
     steps: [
       { label: "Model plan cost", calc: MODEL_MEASURES.map((id) => n(MEASURE_BY_ID[id].cost)).join(" + "), result: euro(MODEL_COST) },
       { label: "Left of the budget", calc: `${n(BUDGET)} − ${n(MODEL_COST)}`, result: euro(BUDGET - MODEL_COST) },
@@ -175,49 +151,103 @@ export function greatestGuide(): MentorGuide {
   return {
     title: "3.3 · The KPI with the greatest leverage",
     answer: `${COMP_BY_ID[MODEL_GREATEST].name} · ${R2().greatestWhy ?? ""}`,
+    example: tt("Company A picks “close rate per customer type” as its greatest-leverage KPI: it is linked to revenue and counted every week for every customer by the systems, so every approach can be judged within weeks, and it answers the problem that customers do not understand the benefit. Name your own KPI, the tests it passes best and the problem of the brief it answers.", "Unternehmen A wählt „Abschlussquote pro Kundentyp“ als KPI mit der größten Hebelwirkung: Er ist mit dem Umsatz verbunden und wird jede Woche für jeden Kunden von den Systemen gezählt, sodass sich jeder Ansatz innerhalb von Wochen beurteilen lässt, und er beantwortet das Problem, dass Kunden den Nutzen nicht verstehen. Nennen Sie Ihren eigenen KPI, die Tests, die er am besten besteht, und das Problem des Auftrags, das er beantwortet."),
     lookFor: ["One of the learner's three KPIs.", "The tests that decide it (early and linked to value together).", "The problem of the brief it answers (customers don't understand the benefit)."],
     pitfalls: ["Slides in the pitch deck as greatest “because it is counted and complete”: it is not linked to value."],
   };
 }
 
-export function triggerGuide(id: ArchId): MentorGuide {
-  const model = MODEL_TRIGGER[id as keyof typeof MODEL_TRIGGER];
-  return {
-    title: `3.5 · ${ARCH_BY_ID[id].name}`,
-    answer: model ?? "A metric, a number, a date and an action for this item.",
-    why: `Owner that defends: ${OWNER_ACCEPT[id].map((o) => OWNERS[o].name).join(" or ")}.`,
-    lookFor: ["A metric about the item's effect.", "A number and a month.", "An action the owner can take alone."],
-  };
-}
+const ids = (m: Record<string, Tier>, f: (t: Tier) => boolean) => ARCH_IDS.filter((id) => f(m[id] ?? "not"));
 
-export function postponedGuide(): MentorGuide {
-  const cost = MODEL_ARCH.reduce((s, id) => s + ARCH_BY_ID[id].cost, 0);
+export function architectureGuide(): MentorGuide {
+  const model = MODEL_TIER;
+  const funded = ids(model, (t) => t !== "not");
+  const mr2 = { tier: model };
+  const plan = planOf(mr2, 0);
+  const weak = planOf(mr2, 1);
+  const r = rangeOf(mr2);
+  const cost = funded.reduce((x, id) => x + ARCH_BY_ID[id].cost, 0);
+  const meas = (p: typeof plan) => funded.filter((id) => PANEL[id].measured && p.items[id].measOk && p.items[id].dataOk && !p.items[id].late && !PANEL[id].blackBox);
+  const sum = (list: (keyof typeof ARCH_BY_ID)[]) => list.reduce((x, id) => x + ARCH_BY_ID[id].cost, 0);
+  const measuredIds = meas(plan);
+  const measuredWeakIds = meas(weak);
+  const riskWeak = funded.filter((id) => PANEL[id].blackBox || !weak.items[id].dataOk || weak.items[id].late);
+  const plus = (list: string[]) => list.join(" + ");
+  const sp = planOf({ tier: { ...model, suite: "now" as const } }, 0);
+  const rl = planOf({ tier: { ...model, relaunch: "now" as const } }, 0);
+  const pn = planOf({ tier: { ...model, personal: "now" as const } }, 0);
   return {
-    title: "3.5 · What is left out, and the pickup point",
-    answer: `${R2().postponed} · ${R2().pickup}`,
+    title: "Step A · The architecture and what the panel shows for it",
+    answer: `Now: ${ids(model, (t) => t === "now").map((id) => PANEL[id].short).join(", ")}. After the proof is ready: ${ids(model, (t) => t === "later").map((id) => PANEL[id].short).join(", ")}. Not now: ${ids(model, (t) => t === "not").map((id) => PANEL[id].short).join(", ")}.`,
     steps: [
-      { label: "Model funded items", calc: MODEL_ARCH.map((id) => n(ARCH_BY_ID[id].cost)).join(" + "), result: euro(cost) },
-      { label: "Left", calc: `${n(R2_BUDGET)} − ${n(cost)}`, result: euro(R2_BUDGET - cost) },
-      { label: "With the AI pitch generator added", calc: `${n(cost)} + ${n(ARCH_BY_ID.suite.cost)}`, result: euro(cost + ARCH_BY_ID.suite.cost) },
+      { label: "Funded items (every Now and After the proof item)", calc: plus(funded.map((id) => n(ARCH_BY_ID[id].cost))), result: euro(cost) },
+      { label: "Budget left", calc: `${n(R2_BUDGET)} − ${n(cost)}`, result: euro(R2_BUDGET - cost) },
+      { label: `Month in use = start + weeks ÷ 4, rounded up (Now starts in month 1; After the proof starts when the reference programme is in use, month ${1 + monthsOf("routing")})`, calc: funded.map((id) => `${PANEL[id].short}: ${plan.items[id].start} + ${ARCH_BY_ID[id].weeks} ÷ 4 → ${inUseOf(mr2, id)}`).join(" · "), result: `all by month ${Math.max(...funded.map((id) => inUseOf(mr2, id)!))} of ${R2_MONTHS}` },
+      { label: "Measurable, brief's figures: money on measured items with claims backed and in use in time ÷ funded money", calc: `(${plus(measuredIds.map((id) => n(ARCH_BY_ID[id].cost)))}) ÷ ${n(cost)} = ${n(sum(measuredIds))} ÷ ${n(cost)}`, result: `${r.meas[0]}%` },
+      { label: `Measurable, backing 15 points weaker (the guides drop to ${(PANEL.chat.data ?? 0) - 15}%)`, calc: `${n(sum(measuredWeakIds))} ÷ ${n(cost)}`, result: `${r.meas[1]}%` },
+      { label: "Risk: money on a black box, on claims below 80% backed or in use after the months ÷ funded money", calc: `0 ÷ ${n(cost)} (brief) · ${n(sum(riskWeak))} ÷ ${n(cost)} (weaker)`, result: `${r.risk[0]}% · ${r.risk[1]}%` },
     ],
-    lookFor: ["The item named, with its cost.", "Why this one (budget, a black box, known but not understood).", "A pickup point with a number and a date."],
+    why: `The model set holds all four tests with the brief's figures (${plan.holding} of ${plan.applicable}) and opens the backing test when the backing is 15 points weaker (${weak.holding} of ${weak.applicable}). That open test is the reason Step B asks what the learner watches. The numbers on screen are computed from one data file, so this table equals the panel.`,
+    lookFor: ["At least one item Now (the task asks for an architecture).", "The story library and KPIs are in place no later than any story tool.", "Nothing the learner cannot explain or measure is funded without a reason, and nothing arrives after the four months without one."],
+    pitfalls: [
+      `Adding the AI pitch generator: ${euro(sp.bars.spent)} funded, ${euro(sp.bars.over)} over the budget, Risk ${sp.bars.risk}% (a black box, in use only in month ${sp.items.suite.inUse}), and ${sp.holding} of ${sp.applicable} tests hold.`,
+      `Adding the image campaign: ${euro(rl.bars.spent)} funded, ${euro(rl.bars.over)} over the budget; it names no KPI, has no customer's own story behind it and is in use only in month ${rl.items.relaunch.inUse}, so ${rl.holding} of ${rl.applicable} tests hold.`,
+      `Setting the storytelling training to Now beside the model set: it starts in month 1 on claims ${PANEL.personal.data}% backed, below ${READY_BAR}%, so the backing test opens (${pn.holding} of ${pn.applicable} hold); After the proof with the reference programme Now starts it in month ${1 + monthsOf("routing")}.`,
+      "Leaving the story library out: every story tool loses its link to the approved stories and the KPIs, so the Measurable bar falls to nothing.",
+    ],
   };
 }
 
-export function assumptionGuide(i: number): MentorGuide {
+export function visionGuide(): MentorGuide {
   return {
-    title: `3.6 · Assumption ${i + 1}`,
-    answer: (R2().assumptions ?? [])[i] ?? "",
-    lookFor: ["What is assumed about the data, the customers or the teams.", "The sign that would show it is wrong, with a number or a date."],
+    title: "Step A · The target vision",
+    answer: R2().vision ?? "",
+    example: tt(
+      "Company A will sell through what changes for the customer: every conversation starts from a story a customer approved, and it steers by two KPIs. Every new tool has to move one of them before it grows. Write your own target vision for SalesTech.",
+      "Unternehmen A wird über das verkaufen, was sich für den Kunden ändert: Jedes Gespräch beginnt bei einer Story, die ein Kunde freigegeben hat, und es steuert über zwei KPIs. Jedes neue Werkzeug muss einen davon bewegen, bevor es wächst. Schreiben Sie Ihr eigenes Zielbild für SalesTech.",
+    ),
+    why: "The plan asks for a target vision of an emotional sales strategy. It is the one place the learner says, in two sentences, what the whole architecture is for, before the items.",
+    lookFor: ["What the strategy does for the company and its customers (benefit in the customer's words, backed by real stories).", "Steering by a few KPIs, not by single tools.", "Two sentences, in the learner's own words."],
   };
 }
 
-export function challengeGuide(): MentorGuide {
+export function giveUpGuide(): MentorGuide {
   return {
-    title: "3.6 · The board's challenge",
-    answer: R2().challenge ?? "",
-    why: "The stories work where they were built: second meetings rose from 30% to 45%. Two months and 12% to 13% are too little to judge deals. Fix the two stories that sounded exaggerated by adding proof; do not go back to features or buy a generator of unchecked claims.",
-    lookFor: ["What is checked first (which stories were called exaggerated; is 12 to 13% based on enough decisions).", "What is kept (the stories, the guides, the tripwire date).", "One change (for example: every story carries its proof before it is told again)."],
-    pitfalls: ["Going back to features: the problem the case started with returns.", "Buying the AI generator: more unchecked claims, the opposite of credibility."],
+    title: "Step A · What the plan gives, and what the learner gives up",
+    answer: R2().giveUp ?? "",
+    example: tt(
+      "Company A's plan gives it an approved story library, a guide per customer type and a few customers who confirm the stories on a call. It gives up a celebrity campaign, which names no KPI, and €15,000 stay unspent. If fewer stories are approved than expected, the guides rest on claims below 80% backed, so they are watched first. Write yours about your own plan: what it gives, what it costs or leaves open.",
+      "Der Plan von Unternehmen A gibt ihm eine freigegebene Story-Bibliothek, einen Leitfaden pro Kundentyp und einige Kunden, die die Storys in einem Gespräch bestätigen. Es verzichtet auf eine Promi-Kampagne, die keinen KPI nennt, und 15.000 € bleiben ungenutzt. Werden weniger Storys freigegeben als erwartet, beruhen die Leitfäden auf Aussagen unter 80 % belegt, also werden sie zuerst beobachtet. Schreiben Sie Ihre über Ihren eigenen Plan: was er gibt, was er kostet oder offen lässt.",
+    ),
+    why: "Every plan gives something and costs something. Writing it first, before the system's reading is opened, is what makes the learner think about the trade-off instead of reading it off.",
+    lookFor: ["One thing the plan gives (measured, backed, in budget, in time).", "One thing it costs or leaves open (an item not now, claims below 80% backed, an item after the four months, budget unspent).", "A link to the two scenarios if the learner saw them."],
+  };
+}
+
+export function decisionWhyGuide(): MentorGuide {
+  return {
+    title: "Step B · Why this decision",
+    answer: R2().decisionWhy ?? "",
+    example: tt(
+      "Company A decides now but pilots with two customer types: the approved stories and the guides start first, so real conversations change within weeks and are measured from the first week, and the big campaign waits because nobody could say what it changes for customers. Write your reason for your own decision.",
+      "Unternehmen A entscheidet jetzt, pilotiert aber mit zwei Kundentypen: Die freigegebenen Storys und die Leitfäden starten zuerst, sodass sich echte Gespräche innerhalb von Wochen ändern und ab der ersten Woche gemessen werden, und die große Kampagne wartet, weil niemand sagen könnte, was sie für Kunden ändert. Schreiben Sie Ihre Begründung für Ihre eigene Entscheidung.",
+    ),
+    why: "A decision part has no single right answer (CLAUDE.md #38): what counts is a clear reason, and that it fits the learner's own Step A. If the decision and Step A disagree, the panel hints and the reason should explain it.",
+    lookFor: ["Names the decision and one rule from Materi B5 it rests on.", "Fits the learner's own Step A, or says why it does not.", "Says how the unclear customer reactions are handled (change real conversations where the claims are backed, measure from week one)."],
+  };
+}
+
+export function watchGuide(): MentorGuide {
+  const refMonth = inUseOf({ tier: MODEL_TIER }, "routing") ?? 0;
+  return {
+    title: "Step B · What the learner watches, and when they would stop",
+    answer: R2().watch ?? "",
+    example: tt(
+      "Company A watches the share of customers who can repeat the benefit: today it is 30%, and if it is not clearly above that by month 3 on enough meetings, it stops adding tools and rewrites its guides. It also watches the claims behind the guides: if they stay below 80% backed, it pauses them. Write yours with the figure from your own plan.",
+      "Unternehmen A beobachtet den Anteil der Kunden, die den Nutzen wiedergeben können: Heute liegt er bei 30 %, und liegt er bis Monat 3 bei genug Gesprächen nicht deutlich darüber, hört es auf, Werkzeuge hinzuzufügen, und schreibt seine Leitfäden neu. Es beobachtet auch die Aussagen hinter den Leitfäden: Bleiben sie unter 80 % belegt, pausiert es sie. Schreiben Sie Ihre mit der Zahl aus Ihrem eigenen Plan.",
+    ),
+    why: `A figure about customers (the close rate of offers or the share who can repeat the benefit), not the company's own output (slides, calls, stories produced), a month in which it can first be read (the reference programme is in use from month ${refMonth} in the model, so month ${refMonth + 1}), and an action. The numbers are the ones printed in “the numbers today”: 35% can repeat the benefit today with an aim of 65%; the backing bar is ${READY_BAR}%.`,
+    lookFor: ["A customer figure, with today's value.", "A month by which it can be read.", "What the learner does if it falls short (stop, pause, change one thing)."],
+    pitfalls: ["Slides, calls or stories produced as the figure: that counts the company's own output.", "No month: a sign nobody can act on."],
   };
 }

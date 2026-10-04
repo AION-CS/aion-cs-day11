@@ -162,3 +162,19 @@ export const AB_MODEL = { change: "one", control: "random", kpi: "conv", size: "
 export const hasHypothesis = (s: string) => /\b(if|wenn|falls)\b/i.test(s) && /\b(because|since|as|weil|da|denn)\b/i.test(s);
 /** A decision rule names a number to decide by. */
 export const hasRuleNumber = (s: string) => /\d/.test(s);
+
+/** The decisive phrase inside each metric's own text, for "Highlight the key words" (never which kind it points to). */
+export const REC_KEY: Record<string, string> = bi({
+  p01: t("deals ÷ offers", "Abschlüsse ÷ Angebote"),
+  p02: t("Revenue from new customers per quarter", "Umsatz mit Neukunden pro Quartal"),
+  p03: t("new customers who renew after the first year", "Neukunden, die nach dem ersten Jahr verlängern"),
+  p04: t("include a customer story from the same industry", "einer Kunden-Story aus derselben Branche"),
+  p05: t("first meetings that lead to a second meeting", "Erstgespräche, die zu einem zweiten Gespräch führen"),
+  p06: t("can repeat the main benefit in the follow-up call", "im Nachgespräch den Hauptnutzen wiedergeben können"),
+  p07: t("promised something the product cannot do", "etwas versprochen worden, das das Produkt nicht kann"),
+  p08: t("pushy sales calls", "aufdringliche Vertriebsanrufe"),
+  p09: t("not backed by a real, approved customer case", "kein echter, freigegebener Kundenfall belegt"),
+  p10: t("Slides in the standard presentation", "Folien in der Standardpräsentation"),
+  p11: t("Sales calls made per week", "Geführte Vertriebsanrufe pro Woche"),
+  p12: t("Brochures sent per month", "Versandte Broschüren pro Monat"),
+});

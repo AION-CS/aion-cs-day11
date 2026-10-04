@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Insight, Toggles } from "@/components/materi/kit";
+import { Insight, Story, ThePoint, Toggles, useStory } from "@/components/materi/kit";
 import { LEVEL_LABEL } from "@/data/ladder";
 import type { LevelTag } from "@/data/ladder";
 import { MOSEL, MOSEL_RESULT, extraOf } from "@/data/forecast";
@@ -16,6 +16,8 @@ import { bi, euro, num, pct, t, tt } from "@/lib/lang";
  * Case assumption), never SalesTech, so the answer to a task block is never printed. Every control is followed by an always-visible
  * "What this shows" (CLAUDE.md #20). (Export names are kept from the file this was built from.)
  */
+/** "In plain words:" leads every reading of a control (CLAUDE.md #36). */
+const plain = () => tt("In plain words: ", "In einfachen Worten: ");
 const C = { ink: "#1F2328", ash: "#59606A", paper: "#FFFEFA", mist: "#ECE6D6", line: "#D8D1BF", amber: "#8A5A0B", gold: "#D99A2B", teal: "#0F6B6B", tealSoft: "#DFEEEB", rust: "#A4472A", rustSoft: "#F6E3DB", data: "#2F5D62", grey: "#8B9098", soft: "#FBF0D6" };
 
 /* ------------------------------------------------------------------ A1 · what decides a purchase: the four emotional triggers */
@@ -32,11 +34,43 @@ const BAND = bi({
 
 export function DelayCost() {
   const uid = useId().replace(/:/g, "");
-  const [band, setBand] = useState<Band>("trust");
+  const [band, setBandRaw] = useState<Band>("trust");
+  const story = useStory([
+    {
+      title: tt("What buyers name first", "Was Käufer zuerst nennen"),
+      say: tt(`Havel Software is an example company, not your case. Asked why they chose it, ${BAND.trust.rate}% of its customers named trust first: will these people be there when something goes wrong?`, `Havel Software ist ein Beispielunternehmen, nicht Ihr Fall. Gefragt, warum sie es wählten, nannten ${BAND.trust.rate} % seiner Kunden zuerst Vertrauen: Sind diese Leute da, wenn etwas schiefgeht?`),
+      look: tt("the longest bar", "der längste Balken"),
+      apply: () => {
+        setBandRaw("trust");
+      },
+    },
+    {
+      title: tt("What buyers name last", "Was Käufer zuletzt nennen"),
+      say: tt(`Only ${BAND.features.rate}% said the technical features decided it. Features are the proof, not the reason: like asking about a garage's tools when you really want to know if you can rely on it.`, `Nur ${BAND.features.rate} % sagten, die technischen Features hätten entschieden. Features sind der Beleg, nicht der Grund: wie nach dem Werkzeug einer Werkstatt zu fragen, wenn man eigentlich wissen will, ob man sich auf sie verlassen kann.`),
+      look: tt("the bar for “The technical features”", "der Balken für „Die technischen Features“"),
+      apply: () => {
+        setBandRaw("features");
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`Buyers decide on trust, security, status and belonging, and use features as proof. Try the five buttons to read each reason.`, `Käufer entscheiden nach Vertrauen, Sicherheit, Status und Zugehörigkeit und nutzen Features als Beleg. Probieren Sie die fünf Schaltflächen, um jeden Grund zu lesen.`),
+      look: tt("the four emotional reasons against the features", "die vier emotionalen Gründe gegen die Features"),
+      apply: () => {
+        setBandRaw("security");
+      },
+    },
+  ]);
+  const setBand = (v: Band) => {
+    story.leave();
+    setBandRaw(v);
+  };
   const b = BAND[band];
   const W = (r: number) => (r / 34) * 300;
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("Purchase decisions are driven by emotions such as trust, security, status and belonging. Technical features matter as proof, but they rarely carry the decision on their own.", "Kaufentscheidungen werden von Emotionen wie Vertrauen, Sicherheit, Status und Zugehörigkeit getrieben. Technische Features zählen als Beleg, tragen die Entscheidung aber selten allein.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 230" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Havel Software: what its customers said decided their purchase", "Havel Software: was nach Aussage der Kunden ihren Kauf entschied")}</title>
         <desc id={`${uid}-d`}>{BANDS.map((k) => `${BAND[k].label}: ${BAND[k].rate}%`).join(", ")}</desc>
@@ -46,6 +80,7 @@ export function DelayCost() {
           const r = BAND[k].rate;
           return (
             <g key={k} className="hit" role="button" tabIndex={0} aria-label={BAND[k].label} onClick={() => setBand(k)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setBand(k)}>
+              {on && story.step !== null && <rect x="-4" y={y - 4} width="556" height="36" rx="7" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
               <text x="0" y={y + 19} fontSize="12" fontWeight={on ? 700 : 400} fill={C.ink}>{BAND[k].label}</text>
               <rect className="hit-shape" x="215" y={y} width={W(r)} height="28" fill={on ? C.gold : k === "features" ? C.grey : C.data} stroke={C.ink} />
               <text x={221 + W(r)} y={y + 19} fontSize="12.5" fontWeight="700" fill={C.ink}>{pct(r)}</text>
@@ -54,7 +89,7 @@ export function DelayCost() {
         })}
       </svg>
       <Toggles<Band> label={tt("What decided the purchase", "Was den Kauf entschied")} value={band} onChange={setBand} options={BANDS.map((k) => ({ id: k, label: BAND[k].label }))} />
-      <Insight>{b.reading}</Insight>
+      <Insight>{plain()}{b.reading}</Insight>
       <p className="text-caption text-ash">{tt("Illustration on Havel Software's customer interviews (Case assumption): 120 customers asked what decided their purchase. Dark bars are the four emotional triggers, the grey bar the features.", "Illustration mit den Kundeninterviews von Havel Software (Fallannahme): 120 Kunden wurden gefragt, was ihren Kauf entschied. Dunkle Balken sind die vier emotionalen Trigger, der graue Balken die Features.")}</p>
     </div>
   );
@@ -96,14 +131,53 @@ const M_IDEAS = bi([
 ]);
 
 export function MomentProfile() {
-  const [v, setV] = useState<LevelTag>("personal");
-  const [d, setD] = useState<Depth>("none");
+  const [v, setVRaw] = useState<LevelTag>("personal");
+  const [d, setDRaw] = useState<Depth>("none");
+  const story = useStory([
+    {
+      title: tt("A feature", "Ein Feature"),
+      say: tt(`Havel Software is an example company, not your case. “Incremental backups every 15 minutes in two data centres” is a feature: true, but the customer has to work out alone what it means for them.`, `Havel Software ist ein Beispielunternehmen, nicht Ihr Fall. „Inkrementelle Backups alle 15 Minuten in zwei Rechenzentren“ ist ein Feature: wahr, aber der Kunde muss allein herausfinden, was es für ihn bedeutet.`),
+      look: tt("the dashed first card", "die gestrichelte erste Karte"),
+      apply: () => {
+        setVRaw("respond");
+        setDRaw("none");
+      },
+    },
+    {
+      title: tt("The same fact as a story", "Dieselbe Tatsache als Story"),
+      say: tt(`Told as a story: an architect's office, a stolen laptop, the plans back by nine, the competition handed in on time. The listener can picture it, remembers it and argues against it less.`, `Als Story erzählt: ein Architekturbüro, ein gestohlener Laptop, die Pläne um neun zurück, der Wettbewerb pünktlich abgegeben. Der Zuhörer kann es sich vorstellen, merkt es sich und widerspricht weniger.`),
+      look: tt("the third card, with a person and a result", "die dritte Karte, mit einer Person und einem Ergebnis"),
+      apply: () => {
+        setVRaw("learn");
+        setDRaw("none");
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`The benefit sits in between: it says what changes for the customer (“you lose at most a quarter of an hour”). Feature, benefit, story: one fact, three ways. Try the buttons.`, `Der Nutzen liegt dazwischen: Er sagt, was sich für den Kunden ändert („Sie verlieren höchstens eine Viertelstunde“). Feature, Nutzen, Story: eine Tatsache, drei Arten. Probieren Sie die Schaltflächen.`),
+      look: tt("the middle card: the same backup in the customer's words", "die mittlere Karte: dasselbe Backup in den Worten des Kunden"),
+      apply: () => {
+        setVRaw("personal");
+        setDRaw("none");
+      },
+    },
+  ]);
+  const setV = (v: LevelTag) => {
+    story.leave();
+    setVRaw(v);
+  };
+  const setD = (v: Depth) => {
+    story.leave();
+    setDRaw(v);
+  };
   const [open, setOpen] = useState<string[]>([]);
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("One fact can be said three ways. A feature describes the product. A benefit says what changes for the customer. A story shows the benefit happening to a real customer. The customer understands and remembers the story best.", "Eine Tatsache lässt sich auf drei Arten sagen. Ein Feature beschreibt das Produkt. Ein Nutzen sagt, was sich für den Kunden ändert. Eine Story zeigt den Nutzen bei einem echten Kunden. Die Story versteht und behält der Kunde am besten.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <div className="grid gap-2 sm:grid-cols-3" role="img" aria-label={tt("One fact said three ways", "Eine Tatsache auf drei Arten gesagt")}>
         {PRINCIPLE_IDS.map((x) => (
-          <div key={x} className={`rounded-md border px-3 py-2 text-caption ${x === v ? "border-accent bg-accentSoft" : "border-line bg-paper"} ${x === "respond" && x === v ? "border-dashed" : ""}`}>
+          <div key={x} className={`rounded-md border px-3 py-2 text-caption ${x === v ? "border-accent bg-accentSoft" : "border-line bg-paper"} ${x === "respond" && x === v ? "border-dashed" : ""} ${story.step !== null && x === v ? "outline outline-2 -outline-offset-2 outline-dashed outline-[#8A5A0B] anim-pulse" : ""}`}>
             <p className="smallcaps">{LEVEL_LABEL[x]}</p>
             <p className="mt-1 text-ink">{SHOWN[x][d]}</p>
           </div>
@@ -113,7 +187,7 @@ export function MomentProfile() {
         <Toggles<Depth> label={tt("Havel fact", "Tatsache bei Havel")} value={d} onChange={setD} options={DEPTHS.map((x) => ({ id: x, label: D_LABEL[x] }))} />
         <Toggles<LevelTag> label={tt("Way of saying it", "Art, es zu sagen")} value={v} onChange={setV} options={PRINCIPLE_IDS.map((x) => ({ id: x, label: LEVEL_LABEL[x] }))} />
       </div>
-      <Insight>{`${D_LABEL[d]} · ${LEVEL_LABEL[v]}: ${READ[v]}`}</Insight>
+      <Insight>{plain()}{`${D_LABEL[d]} · ${LEVEL_LABEL[v]}: ${READ[v]}`}</Insight>
       <div className="space-y-1.5">
         <p className="smallcaps">{tt("A worked sort: three sentences at Havel Software", "Eine Beispielsortierung: drei Sätze bei Havel Software")}</p>
         <ul className="space-y-1.5">
@@ -157,12 +231,44 @@ const VERDICT_GLYPH: Record<Verdict, string> = { respond: "●", personal: "◐"
 
 export function AutomationGrid() {
   const uid = useId().replace(/:/g, "");
-  const [sel, setSel] = useState<string>("n1");
+  const [sel, setSelRaw] = useState<string>("n1");
+  const story = useStory([
+    {
+      title: tt("A security-oriented buyer", "Ein sicherheitsorientierter Käufer"),
+      say: tt(`Havel Software is an example company, not your case. The insurance broker's IT head puts ${N_PAGES[0].leave}% of his questions about details and risks and compares offers: security-oriented. Bring proof, references and a small first step.`, `Havel Software ist ein Beispielunternehmen, nicht Ihr Fall. Die IT-Leitung des Versicherungsmaklers stellt ${N_PAGES[0].leave} % ihrer Fragen zu Details und Risiken und vergleicht Angebote: sicherheitsorientiert. Bringen Sie Belege, Referenzen und einen kleinen ersten Schritt mit.`),
+      look: tt("square 1, in the hatched area", "Quadrat 1, im schraffierten Bereich"),
+      apply: () => {
+        setSelRaw("n1");
+      },
+    },
+    {
+      title: tt("A relationship-oriented buyer", "Eine beziehungsorientierte Käuferin"),
+      say: tt(`The craft business owner talks about people and asks who will look after him; only ${N_PAGES[2].leave}% of his questions are about details. A story told by someone he trusts works best.`, `Der Inhaber des Handwerksbetriebs spricht über Menschen und fragt, wer sich um ihn kümmert; nur ${N_PAGES[2].leave} % seiner Fragen betreffen Details. Eine Story, erzählt von jemandem, dem er vertraut, wirkt am besten.`),
+      look: tt("circle 3, in the top row: we know the person", "Kreis 3, in der oberen Reihe: Wir kennen die Person"),
+      apply: () => {
+        setSelRaw("n3");
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`Many detail questions do not always mean a security type: the online retailer's CTO asks about what is new and compares nothing. Read what the buyer asks and talks about. Try the dots.`, `Viele Detailfragen heißen nicht immer Sicherheitstyp: Der CTO des Onlinehändlers fragt nach Neuem und vergleicht nichts. Lesen Sie, wonach der Käufer fragt und worüber er spricht. Probieren Sie die Punkte.`),
+      look: tt("circle 5, in the grey area", "Kreis 5, im grauen Bereich"),
+      apply: () => {
+        setSelRaw("n5");
+      },
+    },
+  ]);
+  const setSel = (v: string) => {
+    story.leave();
+    setSelRaw(v);
+  };
   const s = N_PAGES.find((x) => x.id === sel)!;
   const X = (l: number) => 60 + (l / 100) * 440;
   const Y = (k: number) => 250 - k * 85;
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("Different buyers need different messages. A security-oriented buyer asks about details and risks and compares offers: give proof and a safe first step. A relationship-oriented buyer talks about people: give a story and a named contact.", "Verschiedene Käufer brauchen verschiedene Botschaften. Ein sicherheitsorientierter Käufer fragt nach Details und Risiken und vergleicht Angebote: Geben Sie Belege und einen sicheren ersten Schritt. Ein beziehungsorientierter Käufer spricht über Menschen: Geben Sie eine Story und eine benannte Ansprechperson.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 300" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Havel Software's prospects by the share of detail and risk questions and what they talk about", "Interessenten von Havel Software nach dem Anteil an Detail- und Risikofragen und dem, worüber sie sprechen")}</title>
         <desc id={`${uid}-d`}>{`${s.name}: ${VERDICT_LABEL[s.verdict]}.`}</desc>
@@ -190,6 +296,7 @@ export function AutomationGrid() {
           const cy = Y(x.known) + (x.known === 0 ? 10 : 0);
           return (
             <g key={x.id} className="hit" role="button" tabIndex={0} aria-label={x.name} onClick={() => setSel(x.id)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSel(x.id)}>
+              {on && story.step !== null && <circle cx={cx} cy={cy} r="21" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
               {x.decision ? <rect className="hit-shape" x={cx - (on ? 14 : 11)} y={cy - (on ? 14 : 11)} width={on ? 28 : 22} height={on ? 28 : 22} rx="3" fill={on ? C.gold : C.data} stroke={C.ink} strokeWidth="1.4" /> : <circle className="hit-shape" cx={cx} cy={cy} r={on ? 14 : 11} fill={on ? C.gold : C.data} stroke={C.ink} strokeWidth="1.4" />}
               <text x={cx} y={cy + 4} textAnchor="middle" fontSize="10.5" fontWeight="700" fill={on ? C.ink : C.paper}>{i + 1}</text>
             </g>
@@ -203,7 +310,7 @@ export function AutomationGrid() {
           </button>
         ))}
       </div>
-      <Insight>{`${s.name} · ${tt(`${s.leave}% detail and risk questions`, `${s.leave} % Detail- und Risikofragen`)} · ${s.decision ? tt("compares offers", "vergleicht Angebote") : tt("does not compare", "vergleicht nicht")} · ${VERDICT_GLYPH[s.verdict]} ${VERDICT_LABEL[s.verdict]}. ${s.why}`}</Insight>
+      <Insight>{plain()}{`${s.name} · ${tt(`${s.leave}% detail and risk questions`, `${s.leave} % Detail- und Risikofragen`)} · ${s.decision ? tt("compares offers", "vergleicht Angebote") : tt("does not compare", "vergleicht nicht")} · ${VERDICT_GLYPH[s.verdict]} ${VERDICT_LABEL[s.verdict]}. ${s.why}`}</Insight>
       <p className="text-caption text-ash">{tt("Illustration on Havel Software (Case assumption). Squares compare several offers, circles do not. Hatched = security-oriented; teal = relationship-oriented; the rest are innovation- or price-oriented.", "Illustration mit Havel Software (Fallannahme). Quadrate vergleichen mehrere Angebote, Kreise nicht. Schraffiert = sicherheitsorientiert; teal = beziehungsorientiert; der Rest ist innovations- oder preisorientiert.")}</p>
     </div>
   );
@@ -213,15 +320,48 @@ export function AutomationGrid() {
 
 export function PilotExample() {
   const uid = useId().replace(/:/g, "");
-  const [yearly, setYearly] = useState(MOSEL.yearly);
+  const [yearly, setYearlyRaw] = useState(MOSEL.yearly);
+  const story = useStory([
+    {
+      title: tt("Two groups, two rates", "Zwei Gruppen, zwei Quoten"),
+      say: tt(`Havel Software is an example company, not your case. Offers presented with a customer story closed at ${pct(MOSEL_RESULT.rate, 1)}, against ${pct(MOSEL_RESULT.other, 1)} when presented technically: ${num(MOSEL_RESULT.lift)} times as often.`, `Havel Software ist ein Beispielunternehmen, nicht Ihr Fall. Mit einer Kunden-Story präsentierte Angebote schlossen zu ${pct(MOSEL_RESULT.rate, 1)} ab, gegenüber ${pct(MOSEL_RESULT.other, 1)} bei technischer Präsentation: ${num(MOSEL_RESULT.lift)}-mal so oft.`),
+      look: tt("the two bars and the amber line under them", "die zwei Balken und die bernsteinfarbene Zeile darunter"),
+      apply: () => {
+        setYearlyRaw(MOSEL.yearly);
+      },
+    },
+    {
+      title: tt("Only the difference is extra", "Nur der Unterschied ist zusätzlich"),
+      say: tt(`Technical offers would have closed ${pct(MOSEL_RESULT.other, 1)} anyway. On ${num(MOSEL.yearly * 2)} offers a year the difference is worth about ${euro(extraOf(MOSEL.yearly * 2, MOSEL_RESULT.rate, MOSEL_RESULT.other, MOSEL.order))}. The app does the arithmetic.`, `Technische Angebote hätten ohnehin ${pct(MOSEL_RESULT.other, 1)} abgeschlossen. Bei ${num(MOSEL.yearly * 2)} Angeboten pro Jahr ist der Unterschied etwa ${euro(extraOf(MOSEL.yearly * 2, MOSEL_RESULT.rate, MOSEL_RESULT.other, MOSEL.order))} wert. Die Rechnung übernimmt die App.`),
+      look: tt("the slider at double the offers, and the sum in “What this shows”", "der Regler bei doppelt so vielen Angeboten und die Rechnung in „Was das zeigt“"),
+      apply: () => {
+        setYearlyRaw(MOSEL.yearly * 2);
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`Two close rates side by side turn “stories seem to work” into a figure. But if salespeople chose which offers got a story, the gap may overstate it: promising, not proven.`, `Zwei Abschlussquoten nebeneinander machen aus „Storys scheinen zu wirken“ eine Zahl. Haben die Vertriebsleute aber gewählt, welche Angebote eine Story bekamen, kann der Abstand sie überschätzen: vielversprechend, nicht bewiesen.`),
+      look: tt("the deals printed behind each bar", "die Abschlüsse, die hinter jedem Balken stehen"),
+      apply: () => {
+        setYearlyRaw(MOSEL.yearly);
+      },
+    },
+  ]);
+  const setYearly = (v: number) => {
+    story.leave();
+    setYearlyRaw(v);
+  };
   const r = MOSEL_RESULT;
   const extra = extraOf(yearly, r.rate, r.other, MOSEL.order);
   const W = (p: number) => (p / 25) * 300;
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("A comparison gives two close rates, one per group. Their ratio says how many times better the story offers did, and the difference, over a year of offers, says what it is worth. A comparison the salespeople shaped is promising, not proof.", "Ein Vergleich gibt zwei Abschlussquoten, eine pro Gruppe. Ihr Verhältnis sagt, wie viel Mal besser die Story-Angebote abschnitten, und der Unterschied, über ein Jahr Angebote, sagt, was er wert ist. Ein Vergleich, den die Vertriebsleute mitgeprägt haben, ist vielversprechend, kein Beweis.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 150" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Havel Software: offers with benefit and story against technical offers", "Havel Software: Angebote mit Nutzen und Story gegen technische Angebote")}</title>
         <desc id={`${uid}-d`}>{tt(`With story ${r.rate}%, technical ${r.other}%, lift ${r.lift}.`, `Mit Story ${num(r.rate)} %, technisch ${num(r.other)} %, Lift ${num(r.lift)}.`)}</desc>
+        {story.step !== null && <rect x="164" y="14" width="396" height="88" rx="8" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
         <text x="0" y="36" fontSize="12" fill={C.ink}>{tt("With benefit and story", "Mit Nutzen und Story")}</text>
         <rect x="170" y="20" width={W(r.rate)} height="26" fill={C.data} stroke={C.ink} />
         <text x={176 + W(r.rate)} y="38" fontSize="12.5" fontWeight="700" fill={C.ink}>{`${pct(r.rate)} (${MOSEL.variant.orders} ${tt("of", "von")} ${num(MOSEL.variant.sent)})`}</text>
@@ -236,7 +376,7 @@ export function PilotExample() {
         </label>
         <input id={`${uid}-y`} type="range" min={200} max={3000} step={100} value={yearly} onChange={(e) => setYearly(Number(e.target.value))} className="w-full max-w-md accent-[#8A5A0B]" />
       </div>
-      <Insight>
+      <Insight>{plain()}
         {tt(
           `${num(yearly)} offers × (${pct(r.rate)} − ${pct(r.other)}) × ${euro(MOSEL.order)} = ${euro(extra)} extra a year if every offer carried the benefit and a story. Only the difference counts: technical offers would have closed ${pct(r.other)} anyway. ${yearly === MOSEL.yearly ? "At 600 offers the example gives €216,000." : `More offers use the same lift more often: ${yearly > MOSEL.yearly ? "more" : "less"} extra revenue.`}`,
           `${num(yearly)} Angebote × (${pct(r.rate)} − ${pct(r.other)}) × ${euro(MOSEL.order)} = ${euro(extra)} zusätzlich pro Jahr, wenn jedes Angebot Nutzen und Story enthielte. Nur der Unterschied zählt: Technische Angebote hätten ohnehin ${pct(r.other)} abgeschlossen. ${yearly === MOSEL.yearly ? "Bei 600 Angeboten ergibt das Beispiel 216.000 €." : `Mehr Angebote nutzen denselben Lift öfter: ${yearly > MOSEL.yearly ? "mehr" : "weniger"} zusätzlicher Umsatz.`}`,
@@ -262,8 +402,45 @@ const KIND_DE: Record<PatternId, string> = { outcome: "ein Outcome-KPI", driver:
 
 export function KpiTree() {
   const uid = useId().replace(/:/g, "");
-  const [sel, setSel] = useState("hist");
-  const [past, setPast] = useState(false);
+  const [sel, setSelRaw] = useState("hist");
+  const [past, setPastRaw] = useState(false);
+  const story = useStory([
+    {
+      title: tt("A driver you can steer by", "Ein Treiber, nach dem Sie steuern"),
+      say: tt(`Havel Software is an example company, not your case. Offers with a customer story come before the deal, the sales team can raise them this month, and they moved with value last year: a driver.`, `Havel Software ist ein Beispielunternehmen, nicht Ihr Fall. Angebote mit Kunden-Story kommen vor dem Abschluss, das Vertriebsteam kann sie diesen Monat steigern, und sie bewegten sich letztes Jahr mit dem Wert: ein Treiber.`),
+      look: tt("the box under the top, and “moved with value”", "der Kasten unter der Spitze und „mit dem Wert bewegt“"),
+      apply: () => {
+        setSelRaw("hist");
+        setPastRaw(true);
+      },
+    },
+    {
+      title: tt("A number that flatters", "Eine Zahl, die schmeichelt"),
+      say: tt(`Slides in the deck counts what Havel produced, not what customers understood. It did not move with value. It looks like progress and decides nothing: a vanity metric, a number that only flatters.`, `Folien im Deck zählt, was Havel produziert hat, nicht was Kunden verstanden haben. Es bewegte sich nicht mit dem Wert. Es sieht nach Fortschritt aus und entscheidet nichts: eine Vanity Metric, eine Zahl, die nur schmeichelt.`),
+      look: tt("the grey box outside the tree", "der graue Kasten außerhalb des Baums"),
+      apply: () => {
+        setSelRaw("channels");
+        setPastRaw(true);
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`Steer by the result and the behaviours that lead to it, watch a limit such as promises the product cannot keep, and stop reporting numbers that only count what you produced. Choose any metric.`, `Steuern Sie nach dem Ergebnis und den Verhalten, die dorthin führen, beobachten Sie eine Grenze wie Versprechen, die das Produkt nicht halten kann, und hören Sie auf, Zahlen zu berichten, die nur zählen, was Sie produziert haben. Wählen Sie eine beliebige Kennzahl.`),
+      look: tt("the dashed amber frame: the guardrail", "der gestrichelte bernsteinfarbene Rahmen: die Guardrail"),
+      apply: () => {
+        setSelRaw("repeat");
+        setPastRaw(true);
+      },
+    },
+  ]);
+  const setSel = (v: string) => {
+    story.leave();
+    setSelRaw(v);
+  };
+  const setPast = (v: boolean | ((v: boolean) => boolean)) => {
+    story.leave();
+    setPastRaw(v);
+  };
   const m = M_METRICS.find((x) => x.id === sel)!;
   const boxes = M_METRICS.map((x) => {
     const same = M_METRICS.filter((y) => y.kind === x.kind);
@@ -274,6 +451,8 @@ export function KpiTree() {
   });
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("Not every number is a KPI. The result sits at the top, the behaviours that lead to it below, a limit that must not get worse beside it; numbers that only count what you produced do not belong in the picture.", "Nicht jede Zahl ist ein KPI. Das Ergebnis steht oben, die Verhalten, die dorthin führen, darunter, eine Grenze, die nicht schlechter werden darf, daneben; Zahlen, die nur zählen, was Sie produziert haben, gehören nicht ins Bild.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 300" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Havel Software's sales communication metrics as a KPI tree", "Die Kennzahlen der Vertriebskommunikation von Havel Software als KPI-Baum")}</title>
         <desc id={`${uid}-d`}>{`${m.name}: ${PATTERNS[m.kind].label}.`}</desc>
@@ -288,6 +467,7 @@ export function KpiTree() {
           const on = x.id === sel;
           return (
             <g key={x.id} className="hit" role="button" tabIndex={0} aria-label={x.name} onClick={() => setSel(x.id)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSel(x.id)}>
+              {on && story.step !== null && <rect x={bx - 5} y={by - 5} width={w + 10} height="58" rx="9" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
               <rect className="hit-shape" x={bx} y={by} width={w} height="48" rx="6" fill={on ? C.soft : x.kind === "vanity" ? C.mist : C.paper} stroke={on ? C.amber : C.ink} strokeWidth={on ? 2.4 : 1.2} />
               <foreignObject x={bx + 4} y={by + 4} width={w - 8} height="40">
                 <div style={{ fontSize: 11.5, lineHeight: 1.2, color: C.ink, textAlign: "center", fontFamily: "system-ui,sans-serif" }}>{x.name}</div>
@@ -305,7 +485,7 @@ export function KpiTree() {
         <Toggles<string> label={tt("Metric", "Kennzahl")} value={sel} onChange={setSel} options={M_METRICS.map((x) => ({ id: x.id, label: x.name }))} />
         <Toggles<string> label={tt("Last year", "Letztes Jahr")} value={past ? "on" : null} onChange={() => setPast((v) => !v)} options={[{ id: "on", label: past ? tt("Hide last year", "Letztes Jahr verbergen") : tt("Show whether it moved with value last year", "Zeigen, ob es sich letztes Jahr mit dem Wert bewegte") }]} />
       </div>
-      <Insight>
+      <Insight>{plain()}
         {past
           ? tt(
               `${m.name} → ${PATTERNS[m.kind].label}. ${m.why} Last year it ${m.moved ? "moved" : "did not move"} with customer value. Both outcomes moved, one of two drivers, the guardrail moved, the vanity metric did not: the closer to the top of the tree, the stronger the link.`,
@@ -335,8 +515,45 @@ const rangeOf = (ctl: number, ratio: number) => {
 
 export function FairTest() {
   const uid = useId().replace(/:/g, "");
-  const [flaw, setFlaw] = useState<Flaw>("none");
-  const [conv, setConv] = useState(30);
+  const [flaw, setFlawRaw] = useState<Flaw>("none");
+  const [conv, setConvRaw] = useState(30);
+  const story = useStory([
+    {
+      title: tt("A fair test", "Ein fairer Test"),
+      say: tt(`Havel Software is an example company, not your case. A fair test is like a race: same track, same start, one runner changed. Havel opens offers with a story for a random half of prospects, in the same weeks.`, `Havel Software ist ein Beispielunternehmen, nicht Ihr Fall. Ein fairer Test ist wie ein Rennen: dieselbe Bahn, derselbe Start, ein Läufer ausgetauscht. Havel eröffnet Angebote mit einer Story für eine zufällige Hälfte der Interessenten, in denselben Wochen.`),
+      look: tt("Group A and Group B: only the opening differs", "Gruppe A und Gruppe B: Nur der Einstieg unterscheidet sich"),
+      apply: () => {
+        setFlawRaw("none");
+        setConvRaw(30);
+      },
+    },
+    {
+      title: tt("An unfair test", "Ein unfairer Test"),
+      say: tt(`Now the variant changes in three things at once. If it wins, nobody knows which of the three did it.`, `Jetzt ändert sich die Variante in drei Dingen zugleich. Gewinnt sie, weiß niemand, was von den dreien es war.`),
+      look: tt("the dashed amber Group B box", "der gestrichelte bernsteinfarbene Kasten von Gruppe B"),
+      apply: () => {
+        setFlawRaw("two");
+        setConvRaw(30);
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`Even a fair test says less than it seems on few results: with 30 deals per group, the same 1.5× could be ${num(rangeOf(30, 1.5).lo)}×, which is no gain. Move the slider to 100.`, `Selbst ein fairer Test sagt bei wenigen Ergebnissen weniger, als es scheint: Mit 30 Abschlüssen pro Gruppe könnte dasselbe 1,5× ${num(rangeOf(30, 1.5).lo)}× sein, also kein Gewinn. Bewegen Sie den Regler auf 100.`),
+      look: tt("the hatched bar crossing the dashed 1× line", "der schraffierte Balken, der die gestrichelte 1×-Linie kreuzt"),
+      apply: () => {
+        setFlawRaw("none");
+        setConvRaw(30);
+      },
+    },
+  ]);
+  const setFlaw = (v: Flaw) => {
+    story.leave();
+    setFlawRaw(v);
+  };
+  const setConv = (v: number) => {
+    story.leave();
+    setConvRaw(v);
+  };
   const f = FLAWS[flaw];
   const ratio = 1.5;
   const { lo, hi } = rangeOf(conv, ratio);
@@ -345,19 +562,21 @@ export function FairTest() {
   const proven = lo > 1;
   return (
     <div className="space-y-4">
+      <ThePoint>{tt("A test is fair when only one thing differs, chance decides who is in which group, both groups run in the same weeks, and the size is fixed in advance. Even then, a small test tells you less than it seems.", "Ein Test ist fair, wenn sich nur eine Sache unterscheidet, der Zufall entscheidet, wer in welcher Gruppe ist, beide Gruppen in denselben Wochen laufen und die Größe vorab feststeht. Selbst dann sagt ein kleiner Test weniger, als es scheint.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <div className="space-y-2">
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="rounded-md border border-line bg-paper px-3 py-2 text-caption">
             <p className="smallcaps">{tt("Group A", "Gruppe A")}</p>
             <p className="text-ink">{f.a}</p>
           </div>
-          <div className={`rounded-md border px-3 py-2 text-caption ${flaw === "none" ? "border-line bg-paper" : "border-dashed border-accent bg-accentSoft"}`}>
+          <div className={`rounded-md border px-3 py-2 text-caption ${flaw === "none" ? "border-line bg-paper" : "border-dashed border-accent bg-accentSoft"} ${story.step === 1 ? "outline outline-2 -outline-offset-2 outline-dashed outline-[#8A5A0B] anim-pulse" : ""}`}>
             <p className="smallcaps">{tt("Group B", "Gruppe B")}</p>
             <p className="text-ink">{f.b}</p>
           </div>
         </div>
         <Toggles<Flaw> label={tt("How Havel runs the test", "Wie Havel den Test durchführt")} value={flaw} onChange={setFlaw} options={FLAW_IDS.map((k) => ({ id: k, label: FLAWS[k].label }))} />
-        <Insight>{f.reading}</Insight>
+        <Insight>{plain()}{f.reading}</Insight>
       </div>
       <div className="space-y-2">
         <svg viewBox="0 0 560 120" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
@@ -377,6 +596,7 @@ export function FairTest() {
               <line x1="0" y1="0" x2="0" y2="8" stroke={C.gold} strokeWidth="2" />
             </pattern>
           </defs>
+          {story.step === 2 && <rect x={X(Math.max(lo, 0.5)) - 4} y="42" width={Math.max(2, X(Math.min(hi, 3)) - X(Math.max(lo, 0.5))) + 8} height="36" rx="5" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
           <rect x={X(Math.max(lo, 0.5))} y="48" width={Math.max(2, X(Math.min(hi, 3)) - X(Math.max(lo, 0.5)))} height="24" fill={proven ? C.tealSoft : `url(#${uid}-h)`} stroke={proven ? C.teal : C.amber} />
           <circle cx={X(ratio)} cy="60" r="6" fill={C.data} stroke={C.ink} />
           <text x="40" y="110" fontSize="11.5" fill={C.ink}>{tt(`measured: 1.5× · plausible range ${num(lo)}× to ${num(hi)}×`, `gemessen: 1,5× · plausible Spanne ${num(lo)}× bis ${num(hi)}×`)}</text>
@@ -385,7 +605,7 @@ export function FairTest() {
           {tt(`Deals in the feature group: ${conv} (the story group has 1.5 times as many)`, `Abschlüsse in der Feature-Gruppe: ${conv} (die Story-Gruppe hat 1,5-mal so viele)`)}
         </label>
         <input id={`${uid}-c`} type="range" min={10} max={300} step={10} value={conv} onChange={(e) => setConv(Number(e.target.value))} className="w-full max-w-md accent-[#8A5A0B]" />
-        <Insight>
+        <Insight>{plain()}
           {proven
             ? tt(`With ${conv} deals per group, even the low end of the range (${num(lo)}×) is above “no difference”: the uplift is real, though its size is still uncertain (up to ${num(hi)}×). Around 100 per group is where a 1.5× result becomes solid.`, `Mit ${conv} Abschlüssen pro Gruppe liegt selbst das untere Ende der Spanne (${num(lo)}×) über „kein Unterschied“: Der Uplift ist echt, auch wenn seine Größe noch unsicher ist (bis ${num(hi)}×). Um 100 pro Gruppe wird ein Ergebnis von 1,5× belastbar.`)
             : tt(`With ${conv} deals per group, the same 1.5× could be anything from ${num(lo)}× to ${num(hi)}×, and the range still includes “no difference” (hatched). Promising, not proven: keep the test running, however good the dashboard looks.`, `Mit ${conv} Abschlüssen pro Gruppe könnte dasselbe 1,5× alles zwischen ${num(lo)}× und ${num(hi)}× sein, und die Spanne schließt „kein Unterschied“ noch ein (schraffiert). Vielversprechend, nicht bewiesen: Lassen Sie den Test weiterlaufen, egal wie gut das Dashboard aussieht.`)}
@@ -407,12 +627,48 @@ const M_MEASURES: WM[] = bi([
 
 export function ScoreExample() {
   const uid = useId().replace(/:/g, "");
-  const [sel, setSel] = useState("profile");
+  const [sel, setSelRaw] = useState("profile");
+  const sc = (id: string) => {
+    const x = M_MEASURES.find((y) => y.id === id)!;
+    return explainBucket(bandOf(x.joins)) * x.eff * x.fea;
+  };
+  const story = useStory([
+    {
+      title: tt("Strong on all three", "Stark in allen dreien"),
+      say: tt(`Havel Software is an example company, not your case. Three customer stories score ${sc("profile")}: the customer hears a real firm like theirs succeed, it moves the result, and every salesperson can use it.`, `Havel Software ist ein Beispielunternehmen, nicht Ihr Fall. Drei Kunden-Storys erzielen ${sc("profile")}: Der Kunde hört, wie eine echte Firma wie seine Erfolg hat, sie bewegen das Ergebnis, und jeder Vertriebsmitarbeiter kann sie nutzen.`),
+      look: tt("the longest bar", "der längste Balken"),
+      apply: () => {
+        setSelRaw("profile");
+      },
+    },
+    {
+      title: tt("One weak factor", "Ein schwacher Faktor"),
+      say: tt(`A glossy brochure of every feature scores only ${sc("am")}: beautiful and complete, but the customer still has to translate every feature into a benefit. One weak factor, here comprehensibility, pulls the product down.`, `Eine Hochglanzbroschüre aller Features erzielt nur ${sc("am")}: schön und vollständig, aber der Kunde muss jedes Feature weiter selbst in einen Nutzen übersetzen. Ein schwacher Faktor, hier die Verständlichkeit, zieht das Produkt herunter.`),
+      look: tt("the short bar, and its three parts in “What this shows”", "der kurze Balken und seine drei Teile in „Was das zeigt“"),
+      apply: () => {
+        setSelRaw("am");
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`Multiply comprehensibility, effect and persuasiveness. Comprehensibility is read from what the customer hears, never guessed. Choose a measure to read its three parts.`, `Multiplizieren Sie Verständlichkeit, Wirkung und Überzeugungskraft. Die Verständlichkeit wird daraus gelesen, was der Kunde hört, nie geschätzt. Wählen Sie eine Maßnahme, um ihre drei Teile zu lesen.`),
+      look: tt("the free extra month: the customer hears a price, not a benefit", "der Gratismonat: Der Kunde hört einen Preis, keinen Nutzen"),
+      apply: () => {
+        setSelRaw("bot");
+      },
+    },
+  ]);
+  const setSel = (v: string) => {
+    story.leave();
+    setSelRaw(v);
+  };
   const m = M_MEASURES.find((x) => x.id === sel)!;
   const e = explainBucket(bandOf(m.joins));
   const score = e * m.eff * m.fea;
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("Score a measure on three questions: how well does the customer understand it, how much does it move the result, and how persuasive is it? The three scores are multiplied, so one weak answer lowers the whole.", "Bewerten Sie eine Maßnahme nach drei Fragen: Wie gut versteht der Kunde sie, wie stark bewegt sie das Ergebnis, und wie überzeugend ist sie? Die drei Werte werden multipliziert, also senkt eine schwache Antwort das Ganze.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 130" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Havel's three measures scored: effect × comprehensibility × persuasiveness", "Havels drei Maßnahmen bewertet: Wirkung × Verständlichkeit × Überzeugungskraft")}</title>
         <desc id={`${uid}-d`}>{M_MEASURES.map((x) => `${x.name}: ${explainBucket(bandOf(x.joins)) * x.eff * x.fea}`).join("; ")}</desc>
@@ -422,6 +678,7 @@ export function ScoreExample() {
           const on = x.id === sel;
           return (
             <g key={x.id} className="hit" role="button" tabIndex={0} aria-label={x.name} onClick={() => setSel(x.id)} onKeyDown={(ev) => (ev.key === "Enter" || ev.key === " ") && setSel(x.id)}>
+              {on && story.step !== null && <rect x="-4" y={y - 4} width="556" height="32" rx="7" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
               <text x="0" y={y + 17} fontSize="12" fontWeight={on ? 700 : 400} fill={C.ink}>{x.name}</text>
               <rect className="hit-shape" x="300" y={y} width={(s / 27) * 220} height="24" fill={on ? C.gold : C.data} stroke={C.ink} />
               <text x={306 + (s / 27) * 220} y={y + 17} fontSize="12.5" fontWeight="700" fill={C.ink}>{s}</text>
@@ -430,7 +687,7 @@ export function ScoreExample() {
         })}
       </svg>
       <Toggles<string> label={tt("Measure", "Maßnahme")} value={sel} onChange={setSel} options={M_MEASURES.map((x) => ({ id: x.id, label: x.name }))} />
-      <Insight>
+      <Insight>{plain()}
         {tt(
           `${m.name} (${euro(m.cost)}, the customer hears ${JOINS_LABEL[m.joins]}): effect ${m.eff} × comprehensibility ${e} × persuasiveness ${m.fea} = ${score}. ${m.note}`,
           `${m.name} (${euro(m.cost)}, der Kunde hört ${JOINS_LABEL[m.joins]}): Wirkung ${m.eff} × Verständlichkeit ${e} × Überzeugungskraft ${m.fea} = ${score}. ${m.note}`,

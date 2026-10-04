@@ -131,48 +131,16 @@ export const ARCH: ArchItem[] = bi([
   { id: "routing" as ArchId, name: t("Reference customer programme", "Referenzkundenprogramm"), what: t("Twelve existing customers who agree to take a call from a prospect of their industry.", "Zwölf Bestandskunden, die zusagen, einen Anruf eines Interessenten ihrer Branche anzunehmen."), cost: 15000, weeks: 4, blackBox: false },
   { id: "training" as ArchId, name: t("Story field in the CRM and a monthly review", "Story-Feld im CRM und ein monatliches Review"), what: t("Which story each offer used, and a monthly meeting that decides on each approach by the KPIs.", "Welche Story jedes Angebot nutzte, und ein monatliches Treffen, das nach den KPIs über jeden Ansatz entscheidet."), cost: 10000, weeks: 2, blackBox: false },
   { id: "tracking" as ArchId, name: t("Proof pack for security-oriented customers", "Beleg-Paket für sicherheitsorientierte Kunden"), what: t("Case figures, certificates and a small pilot offer, so a cautious customer can check before committing.", "Fallzahlen, Zertifikate und ein kleines Pilotangebot, damit ein vorsichtiger Kunde prüfen kann, bevor er sich festlegt."), cost: 15000, weeks: 4, blackBox: false },
-  { id: "suite" as ArchId, name: t("AI pitch generator that writes every offer", "KI-Pitch-Generator, der jedes Angebot schreibt"), what: t("A vendor tool writes the story and the offer for each prospect by itself; its sources and claims are not shown.", "Ein Anbieter-Werkzeug schreibt Story und Angebot für jeden Interessenten selbst; seine Quellen und Behauptungen werden nicht gezeigt."), cost: 50000, weeks: 10, blackBox: true },
-  { id: "relaunch" as ArchId, name: t("Image campaign with a celebrity testimonial", "Imagekampagne mit prominentem Testimonial"), what: t("A known sports presenter recommends SalesTech in video and print.", "Ein bekannter Sportmoderator empfiehlt SalesTech in Video und Print."), cost: 60000, weeks: 12, blackBox: false },
+  { id: "suite" as ArchId, name: t("AI pitch generator that writes every offer", "KI-Pitch-Generator, der jedes Angebot schreibt"), what: t("A vendor tool writes the story and the offer for each prospect by itself; its sources and claims are not shown.", "Ein Anbieter-Werkzeug schreibt Story und Angebot für jeden Interessenten selbst; seine Quellen und Behauptungen werden nicht gezeigt."), cost: 50000, weeks: 14, blackBox: true },
+  { id: "relaunch" as ArchId, name: t("Image campaign with a celebrity testimonial", "Imagekampagne mit prominentem Testimonial"), what: t("A known sports presenter recommends SalesTech in video and print.", "Ein bekannter Sportmoderator empfiehlt SalesTech in Video und Print."), cost: 60000, weeks: 16, blackBox: false },
 ]);
 export const ARCH_BY_ID = Object.fromEntries(ARCH.map((a) => [a.id, a])) as Record<ArchId, ArchItem>;
-export const BASELINE_ITEM: ArchId = "foundation";
-
-export type OwnerId = "cdo" | "datalead" | "cslead" | "saleslead" | "it";
-export const OWNER_IDS: OwnerId[] = ["cdo", "datalead", "cslead", "saleslead", "it"];
-export const OWNERS = bi({
-  cdo: { name: t("Chief Sales Officer (you)", "Chief Sales Officer (Sie)"), profile: t("Decides across teams and answers to the board. Should hold few items.", "Entscheidet über Teams hinweg und berichtet an den Vorstand. Sollte wenige Punkte halten.") },
-  datalead: { name: t("Head of Sales Operations", "Leitung Sales Operations"), profile: t("Owns the CRM, the KPIs and their definitions, and the monthly review.", "Verantwortet das CRM, die KPIs und ihre Definitionen und das monatliche Review.") },
-  cslead: { name: t("Head of Marketing", "Marketingleitung"), profile: t("Owns the stories, the benefit messages and all sales material.", "Verantwortet die Storys, die Nutzenbotschaften und alles Vertriebsmaterial.") },
-  saleslead: { name: t("Head of Field Sales", "Leitung Außendienst"), profile: t("Leads the salespeople in their meetings and decides how they prepare and pitch.", "Führt die Vertriebsleute in ihren Gesprächen und entscheidet, wie sie sich vorbereiten und pitchen.") },
-  it: { name: t("Head of Customer Success", "Leitung Customer Success"), profile: t("Owns the relationship with existing customers, including references.", "Verantwortet die Beziehung zu Bestandskunden, einschließlich Referenzen.") },
-});
-export const OWNER_ACCEPT: Record<ArchId, OwnerId[]> = {
-  foundation: ["cslead", "cdo"],
-  chat: ["saleslead", "cslead"],
-  personal: ["saleslead"],
-  routing: ["it"],
-  training: ["datalead"],
-  tracking: ["cslead", "saleslead"],
-  suite: ["cslead", "cdo"],
-  relaunch: ["cslead"],
-};
-export const MODEL_ARCH: ArchId[] = ["foundation", "chat", "personal", "routing", "training", "tracking"];
-export const MODEL_START: Partial<Record<ArchId, number>> = { foundation: 1, chat: 1, training: 1, tracking: 1, personal: 2, routing: 2 };
-export const MODEL_TRIGGER = bi({
-  foundation: t("If fewer than four of the six stories are approved by their customers by the end of month 1, the training uses only the approved ones and the others wait.", "Sind bis Ende Monat 1 weniger als vier der sechs Storys von ihren Kunden freigegeben, nutzt das Training nur die freigegebenen, und die anderen warten."),
-  chat: t("If fewer than 60% of offers use the guide of the customer's type by month 2, the Head of Field Sales reviews five offers with each team.", "Nutzen bis Monat 2 weniger als 60 % der Angebote den Leitfaden des Kundentyps, prüft die Leitung Außendienst mit jedem Team fünf Angebote."),
-  personal: t("If fewer than half of the customers can repeat the benefit in the follow-up call by month 3, the role plays are repeated with the worst-scoring pitches.", "Können bis Monat 3 weniger als die Hälfte der Kunden im Nachgespräch den Nutzen wiedergeben, werden die Rollenspiele mit den schwächsten Pitches wiederholt."),
-  routing: t("If fewer than eight reference customers have agreed by month 2, existing customers are asked with a thank-you offer.", "Haben bis Monat 2 weniger als acht Referenzkunden zugesagt, werden Bestandskunden mit einem Dankeschön-Angebot gefragt."),
-  training: t("If the story field is empty for more than 20% of offers in any month, the review names the missing offers and their owners.", "Ist das Story-Feld in einem Monat bei mehr als 20 % der Angebote leer, nennt das Review die fehlenden Angebote und ihre Owner."),
-  tracking: t("If more than 2 customers per month say a story or a figure sounded exaggerated, the claim is checked and removed until it is backed.", "Sagen mehr als 2 Kunden pro Monat, eine Story oder Zahl klinge übertrieben, wird die Behauptung geprüft und entfernt, bis sie belegt ist."),
-});
-
 /* ------------------------------------------------------------------ 3.6 · a decision under time pressure and uncertain data */
 
 export type DecisionId = "commit" | "stage" | "wait";
 export const DECISIONS = bi([
   { id: "commit" as DecisionId, label: t("Switch every conversation to the new story pitch at once", "Jedes Gespräch sofort auf den neuen Story-Pitch umstellen"), detail: t("From month 1, every salesperson uses the stories with every customer, and the old presentation is withdrawn.", "Ab Monat 1 nutzt jeder Vertriebsmitarbeiter die Storys bei jedem Kunden, und die alte Präsentation wird zurückgezogen."), why: t("Fast and bold, and it defends only if every customer type reacts to the stories the same way.", "Schnell und mutig, und nur vertretbar, wenn jeder Kundentyp gleich auf die Storys reagiert."), rejected: t("Nobody knows yet how each customer type reacts; if a story misfires with security-oriented customers, it misfires in every meeting at once, and nothing is measured before the switch.", "Niemand weiß schon, wie jeder Kundentyp reagiert; geht eine Story bei sicherheitsorientierten Kunden daneben, dann in jedem Gespräch gleichzeitig, und vor der Umstellung wird nichts gemessen.") },
-  { id: "stage" as DecisionId, label: t("Decide now, pilot with two customer types, with a tripwire", "Jetzt entscheiden, mit zwei Kundentypen pilotieren, mit Tripwire"), detail: t("Start in month 1 with the approved stories and the guides for security- and relationship-oriented customers; add the other two types in month 2; scale only if the tripwire is met.", "In Monat 1 mit den freigegebenen Storys und den Leitfäden für sicherheits- und beziehungsorientierte Kunden starten; in Monat 2 die beiden anderen Typen ergänzen; nur skalieren, wenn der Tripwire erreicht ist."), why: t("It changes real conversations within weeks, learns how each type reacts, and keeps credibility safe before the approach reaches every customer.", "Es ändert echte Gespräche innerhalb von Wochen, lernt, wie jeder Typ reagiert, und sichert die Glaubwürdigkeit, bevor der Ansatz jeden Kunden erreicht."), rejected: t("", "") },
+  { id: "stage" as DecisionId, label: t("Decide now, pilot with two customer types, and watch one figure", "Jetzt entscheiden, mit zwei Kundentypen pilotieren, und eine Zahl beobachten"), detail: t("Start in month 1 with the approved stories and the guides for security- and relationship-oriented customers; add the other two types in month 2; scale only if the figure you watch moves.", "In Monat 1 mit den freigegebenen Storys und den Leitfäden für sicherheits- und beziehungsorientierte Kunden starten; in Monat 2 die beiden anderen Typen ergänzen; nur skalieren, wenn sich die Zahl, die Sie beobachten, bewegt."), why: t("It changes real conversations within weeks, learns how each type reacts, and keeps credibility safe before the approach reaches every customer.", "Es ändert echte Gespräche innerhalb von Wochen, lernt, wie jeder Typ reagiert, und sichert die Glaubwürdigkeit, bevor der Ansatz jeden Kunden erreicht."), rejected: t("", "") },
   { id: "wait" as DecisionId, label: t("Wait for a customer survey on what convinces them", "Auf eine Kundenbefragung warten, was sie überzeugt"), detail: t("Spend the four months on a survey before any conversation changes.", "Die vier Monate mit einer Befragung verbringen, bevor sich irgendein Gespräch ändert."), why: t("", ""), rejected: t("The brief asks for a decision despite unclear customer reactions. Customers rarely say what convinces them; they show it in how they decide, which only real conversations reveal.", "Der Auftrag verlangt eine Entscheidung trotz unklarer Kundenreaktionen. Kunden sagen selten, was sie überzeugt; sie zeigen es darin, wie sie entscheiden, und das zeigen nur echte Gespräche.") },
 ]);
 export const MODEL_DECISION: DecisionId = "stage";
@@ -186,11 +154,3 @@ export const KPIS = bi([
   { id: "emails" as KpiId, label: t("Sales calls per week", "Vertriebsanrufe pro Woche"), unit: t("calls", "Anrufe"), baseline: 300, better: "up" as const, behaviour: false },
 ]);
 export const KPI_BY_ID = Object.fromEntries(KPIS.map((k) => [k.id, k])) as Record<KpiId, (typeof KPIS)[number]>;
-export const MODEL_TRIPWIRE = { kpi: "conv" as KpiId, threshold: 15, month: 4 };
-export const R2_BASELINE_NOTE = bi({ v: t("Baselines are Case assumptions from SalesTech's CRM and follow-up calls of the last twelve months.", "Die Ausgangswerte sind Fallannahmen aus dem CRM und den Nachgesprächen von SalesTech der letzten zwölf Monate.") });
-export const BOARD_CHALLENGE = bi({
-  v: t(
-    "It is month 2. The story pilot runs with security- and relationship-oriented customers. Second meetings rose from 30% to 45%, but the close rate only rose from 12% to 13%, and two customers said a story sounded exaggerated. The Head of Field Sales wants to drop the stories and go back to the feature presentation; marketing wants to buy the AI pitch generator to produce more stories faster. The board asks what you do.",
-    "Es ist Monat 2. Der Story-Pilot läuft mit sicherheits- und beziehungsorientierten Kunden. Zweite Gespräche stiegen von 30 % auf 45 %, aber die Abschlussquote stieg nur von 12 % auf 13 %, und zwei Kunden sagten, eine Story klinge übertrieben. Die Leitung Außendienst will die Storys aufgeben und zur Feature-Präsentation zurück; das Marketing will den KI-Pitch-Generator kaufen, um schneller mehr Storys zu produzieren. Der Vorstand fragt, was Sie tun.",
-  ),
-});

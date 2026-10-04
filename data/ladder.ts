@@ -110,3 +110,16 @@ export const LEVEL_TESTS = bi([
   { name: t("Feature or benefit?", "Feature oder Nutzen?"), test: t("Ask “so what does the customer get from it?”. If the sentence already answers that, it is a benefit; if the listener has to work it out, it is a feature.", "Fragen Sie „Und was hat der Kunde davon?“. Beantwortet der Satz das schon, ist es ein Nutzen; muss der Zuhörer es sich erschließen, ist es ein Feature.") },
   { name: t("Benefit or story?", "Nutzen oder Story?"), test: t("A benefit says what will change for this customer. A story shows it already happened to another real customer, with a person, a problem and what changed.", "Ein Nutzen sagt, was sich für diesen Kunden ändern wird. Eine Story zeigt, dass es einem anderen echten Kunden schon passiert ist, mit einer Person, einem Problem und einem Ergebnis.") },
 ]);
+
+/** The decisive phrase inside each sentence's own text, for "Highlight the key words" (never which kind it points to). */
+export const LINE_KEY: Record<string, string> = bi({
+  l1: t("automatic failover across three availability zones", "automatischem Failover über drei Verfügbarkeitszonen"),
+  l2: t("42 configurable widgets and an open REST API", "42 konfigurierbare Widgets und eine offene REST-API"),
+  l3: t("single sign-on via SAML 2.0", "Single Sign-on über SAML 2.0"),
+  l4: t("your accounting keeps working and nobody in your team notices", "arbeitet Ihre Buchhaltung weiter, und niemand in Ihrem Team merkt etwas"),
+  l5: t("no longer chase e-mails", "keinen E-Mails mehr hinterher"),
+  l6: t("without forgetting passwords", "ohne Passwörter zu vergessen"),
+  l7: t("lost a day of work in a server outage last year", "verlor letztes Jahr bei einem Serverausfall einen Arbeitstag"),
+  l8: t("she now leaves at five", "dass sie jetzt um fünf geht"),
+  l9: t("after two weeks the other five asked to go next", "nach zwei Wochen wollten die anderen fünf als Nächste"),
+});

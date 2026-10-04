@@ -5,19 +5,16 @@ import { BUDGET, JOINS_LABEL, MEASURES, MODEL_COST, MODEL_MEASURES, PROBLEM_LABE
 import {
   ACTION_LABEL,
   ARCH_BY_ID,
+  ARCH_IDS,
   COMPS,
   COMP_BY_ID,
   CRIT_IDS,
   DECISIONS,
   KPIS,
   LOGIC_OWNER_LABEL,
-  MODEL_ARCH,
   MODEL_COMPS,
   MODEL_DECISION,
   MODEL_GREATEST,
-  MODEL_TRIPWIRE,
-  OWNERS,
-  OWNER_ACCEPT,
   OWNER_ACCEPT_LOGIC,
   PRINCIPLES,
   PRINCIPLE_IDS,
@@ -31,6 +28,8 @@ import {
   useOf,
 } from "@/data/route2";
 import type { ArchId } from "@/data/route2";
+import { MODEL_ARCH, MODEL_TIER, PANEL, TIER_LABEL } from "@/data/route2Panel";
+import { planOf, rangeOf } from "@/lib/r2Panel";
 import { MODEL_ORDER } from "@/data/mentorKey";
 import { euro } from "@/lib/lang";
 
@@ -236,42 +235,32 @@ export function logicKey(): AnswerKeyBlock {
   };
 }
 
-export function ownerKey(funded: ArchId[]): AnswerKeyBlock {
-  const ids = funded.length ? funded : MODEL_ARCH;
+export function architectureKey(): AnswerKeyBlock {
+  const spent = MODEL_ARCH.reduce((x, id) => x + ARCH_BY_ID[id].cost, 0);
+  const alt = { ...MODEL_TIER, personal: "now" as const };
+  const why: Record<ArchId, string> = {
+    foundation: "Now. Every story tool tells these stories and every KPI is read from it; it starts in month 1, no later than the first story tool (the test “the stories come first”). At 6 weeks it is in use in month 3.",
+    chat: "Now. €20,000 for 4 weeks: for each customer type the questions, the benefit to lead with, the proof to bring and the words to avoid. Its claims are 88% backed (73% if the backing is weaker: it then rests on claims below 80%, which is why Step B asks what the learner watches).",
+    personal: "After the proof is ready. Its claims are only 60% backed; with the reference programme Now it starts in month 2 and is in use in month 4, inside the four months. Now is possible too, but it starts in month 1 on claims below 80% and the backing test opens.",
+    routing: "Now. €15,000 for 4 weeks: twelve customers who take a call from a prospect of their industry. It backs the weaker claims and it is the item “After the proof is ready” waits for.",
+    training: "Now. €10,000 for 2 weeks: which story each offer used, and a monthly meeting that decides by the KPIs. A defensible cut if the learner needs the room, and then the reading says so.",
+    tracking: "Now. €15,000 for 4 weeks: a cautious customer can check figures, certificates and a small pilot before committing. A defensible cut, and then the reading names the cost.",
+    suite: "Not now. A black box: no KPI it moves, its sources and claims are not shown, €50,000 takes the plan €40,000 over the budget, and at 14 weeks it is in use only in month 5, after the four months. Two tests open (purpose, budget and months).",
+    relaunch: "Not now. A celebrity testimonial names no KPI and has no customer's own story behind it; at 16 weeks it is in use only in month 5, after the four months, and €60,000 would push the plan €50,000 over the budget.",
+  };
   return {
-    title: "Block 3.5 · Owners, sequence and funding",
-    expected: `Model: ${MODEL_ARCH.map((id) => `${ARCH_BY_ID[id].name} (${OWNERS[OWNER_ACCEPT[id][0]].name})`).join(", ")} · ${euro(MODEL_ARCH.reduce((s, id) => s + ARCH_BY_ID[id].cost, 0))}`,
-    options: ids.map((id) => ({
-      label: `${ARCH_BY_ID[id].name} → ${OWNER_ACCEPT[id].map((o) => OWNERS[o].name).join(" or ")}`,
-      expected: true,
-      why:
-        id === "foundation"
-          ? "Head of Marketing (or the CSO). It starts first: the guides, the training and the proof pack are built from its stories."
-          : id === "suite"
-            ? "A black box: nobody at SalesTech can check the claims it writes. Funding it breaks the third rule; the check flags it."
-            : id === "relaunch"
-              ? "It makes SalesTech known, not understood, and €60,000 would push the plan over."
-              : `The owner who can change it without asking anyone: ${OWNERS[OWNER_ACCEPT[id][0]].profile}`,
-    })),
-    teachingNote: `The check tests three rules: the story library starts no later than the first other item, total within ${euro(R2_BUDGET)}, nothing funded is a black box. Owners are not checked by the app; use this key. Leaving out the reference programme instead of the proof pack defends if the learner argues that the proof pack already carries references.`,
+    title: "Step A · The architecture: when does each item happen?",
+    expected: `Model: Now ${MODEL_ARCH.filter((id) => MODEL_TIER[id] === "now").map((id) => PANEL[id].short).join(", ")} · After the proof ${MODEL_ARCH.filter((id) => MODEL_TIER[id] === "later").map((id) => PANEL[id].short).join(", ")} (${euro(spent)} of ${euro(R2_BUDGET)}) · Not now ${ARCH_IDS.filter((id) => MODEL_TIER[id] === "not").map((id) => PANEL[id].short).join(", ")}`,
+    options: ARCH_IDS.map((id) => ({ label: `${PANEL[id].short} → ${TIER_LABEL[MODEL_TIER[id]]}`, expected: MODEL_TIER[id] !== "not", why: why[id] })),
+    teachingNote: `The panel shows four tests as facts, none a verdict, and the learner decides. A different, well-reasoned set is acceptable (CLAUDE.md #38): for example the training Now (the backing test opens, ${planOf({ tier: alt }, 0).holding} of ${planOf({ tier: alt }, 0).applicable} tests hold), the proof pack or the CRM field cut to make room, or going over the budget with a reason. Doing nothing (no item Now) is incomplete, not wrong: the missing list asks for at least one. The model set holds all four tests in the brief's figures and opens the backing test when the backing is 15 points weaker (the guides, ${rangeOf({ tier: MODEL_TIER }).risk[1]}% of the money at risk).`,
   };
 }
 
 export function decisionKey(): AnswerKeyBlock {
   return {
-    title: "Block 3.6 · The communication decision",
+    title: "Step B · The communication decision",
     expected: DECISIONS.find((d) => d.id === MODEL_DECISION)!.label,
     options: DECISIONS.map((d) => ({ label: d.label, expected: d.id !== "wait", why: d.id === MODEL_DECISION ? d.why : d.id === "commit" ? `${d.why} ${d.rejected}` : d.rejected })),
-    teachingNote: "“Switch everything” and “Pilot with two types” are both decisions, with different reasoning; the check outlines only “Wait”, because the brief asks for a decision despite unclear customer reactions. Push a learner who switches everything on what happens if one type reacts badly.",
-  };
-}
-
-export function tripKey(): AnswerKeyBlock {
-  const k = KPIS.find((x) => x.id === MODEL_TRIPWIRE.kpi)!;
-  return {
-    title: "Block 3.6 · The tripwire",
-    expected: `${k.label} ≥ ${MODEL_TRIPWIRE.threshold}% by month ${MODEL_TRIPWIRE.month}, else adjust one rule`,
-    options: KPIS.map((x) => ({ label: `${x.label} (baseline ${x.baseline}${x.unit === "%" ? "%" : ` ${x.unit}`})`, expected: x.behaviour, why: x.behaviour ? "How customers behave: the result the system is meant to move." : "Counts SalesTech's own output, not how customers responded." })),
-    teachingNote: "Any customer metric with a threshold better than its baseline defends. Offers with a matched story is the tempting one: it counts what salespeople do, a good trigger for the guides in 3.5, and the wrong tripwire for whether customers buy. Slides and calls count our own output.",
+    teachingNote: "“Switch every conversation” and “Pilot in stages” are both decisions, with different reasoning; the plan rejects only “Wait”, because the brief asks for a decision despite unclear customer reactions: customers rarely say what convinces them, they show it in real conversations. All three stay selectable. The panel shows one plain hint when the decision and Step A disagree (wait while Step A builds; switch every conversation while Step A does not start both the guides and the training now) and the learner explains the contradiction in their reason. Push a learner who switches every conversation at once on what happens when a story misfires with one customer type.",
   };
 }

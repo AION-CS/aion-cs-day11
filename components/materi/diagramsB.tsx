@@ -1,15 +1,19 @@
 "use client";
 
+import clsx from "clsx";
 import { useId, useState } from "react";
-import { Insight, Toggles } from "@/components/materi/kit";
+import { Insight, Story, ThePoint, Toggles, useStory } from "@/components/materi/kit";
 import { CASES_MIN, LIFT_ACT, LIFT_WATCH } from "@/data/route2";
 import { bi, num, t, tt } from "@/lib/lang";
 import { Gloss } from "@/lib/glossify";
 
 /**
  * The interactive diagrams of Materi B (Route 2). Every one uses the worked-example company Neisse Systems (a Görlitz software provider,
- * Case assumption), never SalesTech. Every control is followed by an always-visible "What this shows" (CLAUDE.md #20).
+ * Case assumption), never SalesTech. Every control is followed by an always-visible "What this shows" (CLAUDE.md #20), every picture opens with "The point" and carries a three-step "Walk me through it" story that
+ * drives the real controls (CLAUDE.md #36); a manual button leaves the story.
  */
+/** "In plain words:" leads every reading of a control (CLAUDE.md #36). */
+const plain = () => tt("In plain words: ", "In einfachen Worten: ");
 const C = { ink: "#1F2328", ash: "#59606A", paper: "#FFFEFA", mist: "#ECE6D6", line: "#D8D1BF", amber: "#8A5A0B", gold: "#D99A2B", teal: "#0F6B6B", tealSoft: "#DFEEEB", data: "#2F5D62", grey: "#8B9098", soft: "#FBF0D6", rust: "#A4472A" };
 
 /* ------------------------------------------------------------------ B1 · four stages towards an emotional sales strategy */
@@ -25,11 +29,43 @@ const STAGE_TEXT = bi({
 
 export function DataStages() {
   const uid = useId().replace(/:/g, "");
-  const [st, setSt] = useState<Stage>("dash");
+  const [st, setStRaw] = useState<Stage>("dash");
+  const story = useStory([
+    {
+      title: tt("Tested and reviewed monthly", "Getestet und monatlich geprüft"),
+      say: tt(`Neisse Systems is an example company, not your case. Each story is recorded in the CRM, and every month the same KPIs decide which approach is rolled out, tested further or stopped.`, `Neisse Systems ist ein Beispielunternehmen, nicht Ihr Fall. Jede Story wird im CRM erfasst, und jeden Monat entscheiden dieselben KPIs, welcher Ansatz ausgerollt, weiter getestet oder gestoppt wird.`),
+      look: tt("the last, tallest bar", "der letzte, höchste Balken"),
+      apply: () => {
+        setStRaw("forecast");
+      },
+    },
+    {
+      title: tt("Features for everyone", "Features für alle"),
+      say: tt(`Before that, every salesperson showed the same 40 slides of features to every customer, whatever they asked. Customers heard what the product has, not what it does for them.`, `Davor zeigte jeder Vertriebsmitarbeiter jedem Kunden dieselben 40 Folien mit Features, egal was er fragte. Kunden hörten, was das Produkt hat, nicht was es für sie tut.`),
+      look: tt("the first, shortest bar", "der erste, niedrigste Balken"),
+      apply: () => {
+        setStRaw("report");
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`The jump from features to a strategy is the benefit message: what changes for the customer, in the customer's words. Try the four stages.`, `Der Sprung von Features zu einer Strategie ist die Nutzenbotschaft: was sich für den Kunden ändert, in den Worten des Kunden. Probieren Sie die vier Stufen.`),
+      look: tt("the second bar", "der zweite Balken"),
+      apply: () => {
+        setStRaw("dash");
+      },
+    },
+  ]);
+  const setSt = (v: Stage) => {
+    story.leave();
+    setStRaw(v);
+  };
   const idx = STAGES.indexOf(st);
   const s = STAGE_TEXT[st];
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("An emotional sales strategy is not a longer deck. It is one benefit message in the customer's words, a story for each customer type, and a monthly look at which approach works.", "Eine emotionale Vertriebsstrategie ist kein längeres Deck. Sie ist eine Nutzenbotschaft in den Worten des Kunden, eine Story für jeden Kundentyp und ein monatlicher Blick darauf, welcher Ansatz wirkt.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 170" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Four stages towards an emotional sales strategy", "Vier Stufen zu einer emotionalen Vertriebsstrategie")}</title>
         <desc id={`${uid}-d`}>{tt(`Stage shown: ${s.name}.`, `Gezeigte Stufe: ${s.name}.`)}</desc>
@@ -39,6 +75,7 @@ export function DataStages() {
           const on = i <= idx;
           return (
             <g key={k} className="hit" role="button" tabIndex={0} aria-label={STAGE_TEXT[k].name} onClick={() => setSt(k)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSt(k)}>
+              {k === st && story.step !== null && <rect x={x - 4} y={150 - h - 4} width="136" height={h + 8} rx="6" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
               <rect className="hit-shape" x={x} y={150 - h} width="128" height={h} fill={k === st ? C.gold : on ? C.data : C.paper} stroke={C.ink} strokeWidth="1.4" />
               <text x={x + 64} y={166} textAnchor="middle" fontSize="11" fill={C.ash}>{`${i + 1}`}</text>
             </g>
@@ -51,7 +88,7 @@ export function DataStages() {
         <span className="smallcaps mr-1.5">Neisse Systems</span>
         {s.spree}
       </p>
-      <Insight>{s.reading}</Insight>
+      <Insight>{plain()}{s.reading}</Insight>
     </div>
   );
 }
@@ -69,13 +106,45 @@ const I_SRC: ISrc[] = bi([
 const useOfI = (s: ISrc) => (!s.decision ? "leave" : s.complete >= 80 ? "core" : "later");
 export function SourceGrid() {
   const uid = useId().replace(/:/g, "");
-  const [sel, setSel] = useState("voice");
+  const [sel, setSelRaw] = useState("voice");
+  const story = useStory([
+    {
+      title: tt("Select now", "Jetzt auswählen"),
+      say: tt(`Neisse Systems is an example company, not your case. The dental practice story names a KPI it should move, and ${I_SRC[0].complete}% of its data is ready: select now, and test it against a control group.`, `Neisse Systems ist ein Beispielunternehmen, nicht Ihr Fall. Die Story der Zahnarztpraxis nennt einen KPI, den sie bewegen soll, und ${I_SRC[0].complete} % ihrer Daten sind bereit: jetzt auswählen und gegen eine Kontrollgruppe testen.`),
+      look: tt("the dot in the teal area", "der Punkt im türkisen Feld"),
+      apply: () => {
+        setSelRaw("upsell");
+      },
+    },
+    {
+      title: tt("Data first", "Erst die Daten"),
+      say: tt(`The ROI story of the plumber would move a KPI too, but only ${I_SRC[2].complete}% of its data is ready. Built on now, it would learn the gaps. Fix the data first.`, `Die ROI-Story des Installateurs würde auch einen KPI bewegen, aber nur ${I_SRC[2].complete} % ihrer Daten sind bereit. Jetzt darauf gebaut, würde sie die Lücken lernen. Erst die Daten verbessern.`),
+      look: tt("the dot in the amber area", "der Punkt im bernsteinfarbenen Feld"),
+      apply: () => {
+        setSelRaw("voice");
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`The ISO certificate history has ${I_SRC[4].complete}% of its data ready, but it moves no KPI of the system. However complete, not now. Try the other items.`, `Die ISO-Zertifikatsgeschichte hat ${I_SRC[4].complete} % seiner Daten bereit, bewegt aber keinen KPI des Systems. Egal wie vollständig: jetzt nicht. Probieren Sie die anderen Punkte.`),
+      look: tt("the dot in the grey area", "der Punkt im grauen Feld"),
+      apply: () => {
+        setSelRaw("images");
+      },
+    },
+  ]);
+  const setSel = (v: string) => {
+    story.leave();
+    setSelRaw(v);
+  };
   const s = I_SRC.find((x) => x.id === sel)!;
   const u = useOfI(s);
   const POS: Record<string, { cx: number; cy: number }> = { upsell: { cx: 300, cy: 58 }, winback: { cx: 300, cy: 88 }, voice: { cx: 90, cy: 72 }, sentiment: { cx: 90, cy: 138 }, images: { cx: 300, cy: 138 } };
   const pos = (x: ISrc, _i: number) => POS[x.id];
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("Start from the KPI, not from the tool. An item that names a KPI and has its data ready is selected now; with data not ready it waits; with no KPI it is not now, however good it sounds.", "Gehen Sie vom KPI aus, nicht vom Werkzeug. Ein Punkt, der einen KPI nennt und dessen Daten bereit sind, wird jetzt gewählt; mit nicht bereiten Daten wartet er; ohne KPI ist er jetzt nicht dran, egal wie gut er klingt.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 210" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Neisse Systems' storytelling approaches by customer decision and backing", "Storytelling-Ansätze von Neisse Systems nach Kundenentscheidung und Beleg")}</title>
         <desc id={`${uid}-d`}>{I_SRC.map((x) => `${x.name}: ${useOfI(x)}`).join(", ")}</desc>
@@ -93,6 +162,7 @@ export function SourceGrid() {
           const on = x.id === sel;
           return (
             <g key={x.id} className="hit" role="button" tabIndex={0} aria-label={x.name} onClick={() => setSel(x.id)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSel(x.id)}>
+              {on && story.step !== null && <circle cx={p.cx} cy={p.cy} r="17" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
               <circle className="hit-shape" cx={p.cx} cy={p.cy} r={on ? 11 : 8} fill={on ? C.gold : C.paper} stroke={C.ink} strokeWidth="1.6" />
               <text x={p.cx + 14} y={p.cy + 4} fontSize="11.5" fontWeight={on ? 800 : 500} fill={C.ink}>{x.name}</text>
             </g>
@@ -100,7 +170,7 @@ export function SourceGrid() {
         })}
       </svg>
       <Toggles<string> label={tt("Approach", "Ansatz")} value={sel} onChange={setSel} options={I_SRC.map((x) => ({ id: x.id, label: x.name }))} />
-      <Insight>
+      <Insight>{plain()}
         {u === "core"
           ? tt(`${s.name}: it helps the customer make a buying decision, and ${s.complete}% of its claims are backed by a real, approved customer case. Central: use it now, in a version for each customer type.`, `${s.name}: Er hilft dem Kunden bei einer Kaufentscheidung, und ${s.complete} % seiner Aussagen sind durch einen echten, freigegebenen Kundenfall belegt. Zentral: jetzt einsetzen, in einer Version für jeden Kundentyp.`)
           : u === "later"
@@ -124,11 +194,43 @@ const I_COMPS = bi([
 ]);
 export function CompProfile() {
   const uid = useId().replace(/:/g, "");
-  const [sel, setSel] = useState("views");
+  const [sel, setSelRaw] = useState("views");
+  const story = useStory([
+    {
+      title: tt("A KPI that passes", "Ein KPI, der besteht"),
+      say: tt(`Neisse Systems is an example company, not your case. The close rate per customer type is linked to value, counted every week for every customer by the systems: High on all four, 12 of 12.`, `Neisse Systems ist ein Beispielunternehmen, nicht Ihr Fall. Die Abschlussquote pro Kundentyp ist mit dem Wert verbunden und wird jede Woche für jeden Kunden von den Systemen gezählt: Hoch auf allen vier, 12 von 12.`),
+      look: tt("all four rows filled to High", "alle vier Zeilen bis Hoch gefüllt"),
+      apply: () => {
+        setSelRaw("upgrade");
+      },
+    },
+    {
+      title: tt("A number that does not", "Eine Zahl, die nicht besteht"),
+      say: tt(`Presentations held is automatic and exact, but it rose while the close rate stood still: giving a presentation is not winning a customer. The link to value stays Low, whatever the rest.`, `Gehaltene Präsentationen ist automatisch und genau, stieg aber, während die Abschlussquote stillstand: Eine Präsentation zu halten heißt nicht, einen Kunden zu gewinnen. Die Verbindung zum Wert bleibt Niedrig, egal wie der Rest ist.`),
+      look: tt("the first row, Link to value", "die erste Zeile, Verbindung zum Wert"),
+      apply: () => {
+        setSelRaw("views");
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`The yearly survey score is linked to value but arrives once a year, so it is Low on early: a number for learning, not for steering. Try the other candidates.`, `Der jährliche Befragungswert ist mit dem Wert verbunden, kommt aber einmal im Jahr und ist daher bei „früh“ Niedrig: eine Zahl zum Lernen, nicht zum Steuern. Probieren Sie die anderen Kandidaten.`),
+      look: tt("the second row, Early", "die zweite Zeile, Früh"),
+      apply: () => {
+        setSelRaw("survey");
+      },
+    },
+  ]);
+  const setSel = (v: string) => {
+    story.leave();
+    setSelRaw(v);
+  };
   const c = I_COMPS.find((x) => x.id === sel)!;
   const total = I_CRITS.reduce((s, k) => s + c.r[k], 0);
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("A KPI worth steering by is linked to value, shows a change early, covers every customer and is counted by the systems. The printed facts cap each rating.", "Ein KPI, nach dem es sich zu steuern lohnt, ist mit dem Wert verbunden, zeigt früh eine Veränderung, deckt jeden Kunden ab und wird von den Systemen gezählt. Die gedruckten Fakten deckeln jede Bewertung.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 170" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("One KPI candidate of Neisse Systems on four tests", "Ein KPI-Kandidat von Neisse Systems nach vier Tests")}</title>
         <desc id={`${uid}-d`}>{I_CRITS.map((k) => `${I_CRIT_NAME[k]} ${c.r[k]}`).join(", ")}</desc>
@@ -137,6 +239,7 @@ export function CompProfile() {
           const v = c.r[k];
           return (
             <g key={k}>
+              {((story.step === 1 && k === "explain") || (story.step === 2 && k === "timely")) && <rect x="-4" y={y - 3} width="556" height="32" rx="6" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
               <text x="0" y={y + 18} fontSize="12" fill={C.ink}>{I_CRIT_NAME[k]}</text>
               {[1, 2, 3].map((b) => (
                 <rect key={b} x={160 + (b - 1) * 110} y={y} width="104" height="26" fill={b <= v ? (v === 1 ? C.grey : C.data) : C.paper} stroke={C.ink} strokeDasharray={b <= v ? undefined : "4 3"} />
@@ -151,7 +254,7 @@ export function CompProfile() {
         <span className="font-semibold text-ink">{tt("Printed facts: ", "Gedruckte Fakten: ")}</span>
         {c.facts}
       </p>
-      <Insight>
+      <Insight>{plain()}
         {tt(`${c.name}: ${total} of 12. ${c.note} Each rating is capped by a printed fact: “not linked to value” caps the link at Low; “after the customer has left” or “yearly” caps early at Low; “some customers” caps reach at Mid; “collected by hand” caps measured automatically at Low.`, `${c.name}: ${total} von 12. ${c.note} Jede Bewertung ist durch einen gedruckten Fakt gedeckelt: „nicht mit dem Wert verbunden“ deckelt die Verbindung bei Niedrig; „nachdem der Kunde gegangen ist“ oder „jährlich“ deckeln früh bei Niedrig; „einige Kunden“ deckelt die Reichweite bei Mittel; „von Hand gesammelt“ deckelt automatisch gemessen bei Niedrig.`)}
       </Insight>
     </div>
@@ -162,13 +265,52 @@ export function CompProfile() {
 
 export function LiftCases() {
   const uid = useId().replace(/:/g, "");
-  const [lift, setLift] = useState(20);
-  const [cases, setCases] = useState(40);
+  const [lift, setLiftRaw] = useState(20);
+  const [cases, setCasesRaw] = useState(40);
+  const story = useStory([
+    {
+      title: tt("Roll out", "Ausrollen"),
+      say: tt(`Neisse Systems is an example company, not your case. A test of a story opening shows +30% on 200 decisions per group: clear and proven. Roll out.`, `Neisse Systems ist ein Beispielunternehmen, nicht Ihr Fall. Ein Test einer Story als Einstieg zeigt +30 % bei 200 Entscheidungen pro Gruppe: klar und belegt. Ausrollen.`),
+      look: tt("the dot in the teal area", "der Punkt im türkisen Feld"),
+      apply: () => {
+        setLiftRaw(30);
+        setCasesRaw(200);
+      },
+    },
+    {
+      title: tt("Keep testing", "Weiter testen"),
+      say: tt(`Another test also shows +30%, but on only 40 decisions per group, fewer than ${CASES_MIN}. Too few to trust it: keep testing.`, `Ein anderer Test zeigt auch +30 %, aber nur bei 40 Entscheidungen pro Gruppe, weniger als ${CASES_MIN}. Zu wenig, um ihm zu trauen: weiter testen.`),
+      look: tt("the dot in the left amber strip", "der Punkt im linken bernsteinfarbenen Streifen"),
+      apply: () => {
+        setLiftRaw(30);
+        setCasesRaw(40);
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt(`A third test shows +2% on 300 decisions. Many decisions do not rescue a tiny uplift: they prove it is tiny. Stop. Move the two sliders to try your own.`, `Ein dritter Test zeigt +2 % bei 300 Entscheidungen. Viele Entscheidungen retten keinen winzigen Uplift: Sie beweisen, dass er winzig ist. Stoppen. Bewegen Sie die beiden Regler, um eigene Werte zu probieren.`),
+      look: tt("the dot in the grey area", "der Punkt im grauen Feld"),
+      apply: () => {
+        setLiftRaw(2);
+        setCasesRaw(300);
+      },
+    },
+  ]);
+  const setLift = (v: number) => {
+    story.leave();
+    setLiftRaw(v);
+  };
+  const setCases = (v: number) => {
+    story.leave();
+    setCasesRaw(v);
+  };
   const act = lift >= LIFT_ACT && cases >= CASES_MIN ? "intervene" : lift >= LIFT_WATCH ? "watch" : "none";
   const X = (c: number) => 60 + (Math.min(c, 300) / 300) * 460;
   const Y = (l: number) => 170 - ((Math.min(Math.max(l, -10), 60) + 10) / 70) * 150;
   return (
     <div className="space-y-3">
+      <ThePoint>{tt("Every test ends in a decision. A clear uplift on enough decisions: roll out. A strong uplift on too few, or a small one: keep testing. No real uplift: stop.", "Jeder Test endet in einer Entscheidung. Ein klarer Uplift bei genug Entscheidungen: ausrollen. Ein starker Uplift bei zu wenigen oder ein kleiner: weiter testen. Kein echter Uplift: stoppen.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
       <svg viewBox="0 0 560 200" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
         <title id={`${uid}-t`}>{tt("Roll out, keep testing or stop, by uplift and decisions per group", "Ausrollen, weiter testen oder stoppen, nach Uplift und Entscheidungen pro Gruppe")}</title>
         <desc id={`${uid}-d`}>{tt(`Uplift ${lift}%, ${cases} decisions: ${act}.`, `Uplift ${lift} %, ${cases} Entscheidungen: ${act}.`)}</desc>
@@ -184,6 +326,7 @@ export function LiftCases() {
         <line x1={X(0)} y1={Y(-10)} x2={X(0)} y2={Y(60)} stroke={C.ash} />
         <text x={X(150)} y="196" textAnchor="middle" fontSize="11" fill={C.ash}>{tt("decisions (won or lost) in the smaller group →", "Entscheidungen (gewonnen oder verloren) in der kleineren Gruppe →")}</text>
         <text x="16" y={Y(25)} textAnchor="middle" fontSize="11" fill={C.ash} transform={`rotate(-90 16 ${Y(25)})`}>{tt("uplift % →", "Uplift % →")}</text>
+        {story.step !== null && <circle cx={X(cases)} cy={Y(lift)} r="17" fill="none" stroke={C.amber} strokeWidth="2" strokeDasharray="5 4" className="anim-pulse" />}
         <circle cx={X(cases)} cy={Y(lift)} r="9" fill={C.gold} stroke={C.ink} strokeWidth="2" />
       </svg>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -196,7 +339,7 @@ export function LiftCases() {
           <input id={`${uid}-cases`} type="range" min={10} max={300} step={10} value={cases} onChange={(e) => setCases(Number(e.target.value))} className="w-full accent-[#8A5A0B]" />
         </div>
       </div>
-      <Insight>
+      <Insight>{plain()}
         {act === "intervene"
           ? tt(`An uplift of ${lift}% on ${cases} decisions per group: clear and proven. Roll out, and hand it to the team that leads those conversations.`, `Ein Uplift von ${lift} % bei ${cases} Entscheidungen pro Gruppe: klar und belegt. Ausrollen, und dem Team übergeben, das diese Gespräche führt.`)
           : act === "watch"
@@ -209,57 +352,93 @@ export function LiftCases() {
   );
 }
 
-/* ------------------------------------------------------------------ B5 · Neisse's measures architecture over four months */
+/* ------------------------------------------------------------------ B5 · how an architecture is built: Neisse's story guide and its base */
 
-const I_ARCH = bi([
-  { id: "base", name: t("Approved story library", "Freigegebene Story-Bibliothek"), start: 1, owner: t("Head of Marketing", "Marketingleitung"), trigger: t("If fewer than three of the five stories are approved by their customers by the end of month 1, the training starts with the approved ones only.", "Sind bis Ende Monat 1 weniger als drei der fünf Storys von ihren Kunden freigegeben, startet das Training nur mit den freigegebenen."), why: t("Starts first: the guides and the training tell these stories, so they must exist and be true.", "Startet zuerst: Die Leitfäden und das Training erzählen diese Storys, also müssen sie existieren und wahr sein.") },
-  { id: "score", name: t("Story field in the CRM", "Story-Feld im CRM"), start: 1, owner: t("Head of Sales Operations", "Leitung Sales Operations"), trigger: t("If the field is empty for more than 20% of offers in month 2, the monthly review names the missing offers.", "Ist das Feld in Monat 2 bei mehr als 20 % der Angebote leer, nennt das monatliche Review die fehlenden Angebote."), why: t("Starts in the same month: it needs only the CRM, and without it nobody can tell which story won.", "Startet im selben Monat: Es braucht nur das CRM, und ohne es kann niemand sagen, welche Story gewonnen hat.") },
-  { id: "calls", name: t("Storytelling training", "Storytelling-Training"), start: 2, owner: t("Head of Field Sales", "Leitung Außendienst"), trigger: t("If fewer than half of the customers can repeat the benefit in the follow-up call by month 3, the role plays are repeated.", "Können bis Monat 3 weniger als die Hälfte der Kunden im Nachgespräch den Nutzen wiedergeben, werden die Rollenspiele wiederholt."), why: t("Starts once there are approved stories to practise with.", "Startet, sobald es freigegebene Storys zum Üben gibt.") },
-]);
+/**
+ * The worked example of Materi B5 on the example company Neisse Systems (a Görlitz software provider) (Case assumption): a small version of the Route 2 panel. Two controls set the same
+ * two facts the panel reads: does the story library start before the guide, and are its claims or data backed. The links in the picture break the way the
+ * panel's do, and "What this shows" says what the break means.
+ */
 export function ArchExample() {
-  const uid = useId().replace(/:/g, "");
-  const [sel, setSel] = useState("base");
-  const r = I_ARCH.find((x) => x.id === sel)!;
-  const X = (m: number) => 250 + (m - 1) * 76;
+  const [measFirst, setMeasFirstRaw] = useState(true);
+  const [ready, setReadyRaw] = useState(true);
+  const story = useStory([
+    {
+      title: tt("The base first", "Die Basis zuerst"),
+      say: tt("Neisse Systems is an example company, not your case. It approves its stories and KPIs first, so its guide tells only stories a customer approved and is measured from its first week.", "Neisse Systems ist ein Beispielunternehmen, nicht Ihr Fall. Es gibt zuerst seine Storys und KPIs frei, damit sein Leitfaden nur Storys erzählt, die ein Kunde freigegeben hat, und ab der ersten Woche gemessen wird."),
+      look: tt("the solid teal link between the guide and the base", "die durchgezogene teal Verbindung zwischen Leitfaden und Basis"),
+      apply: () => {
+        setMeasFirstRaw(true);
+        setReadyRaw(true);
+      },
+    },
+    {
+      title: tt("The tool before the base", "Das Werkzeug vor der Basis"),
+      say: tt("Now the guide starts first. It has no approved story to tell and nothing measures it, so nobody can say whether it helps. Its link is dashed.", "Jetzt startet der Leitfaden zuerst. Er hat keine freigegebene Story zum Erzählen, und nichts misst ihn, also kann niemand sagen, ob er hilft. Seine Verbindung ist gestrichelt."),
+      look: tt("the dashed amber link and the note on the guide", "die gestrichelte amberfarbene Verbindung und der Vermerk am Leitfaden"),
+      apply: () => {
+        setMeasFirstRaw(false);
+        setReadyRaw(true);
+      },
+    },
+    {
+      title: tt("The point", "Das Wichtigste"),
+      say: tt("Approved first, but with claims only 75% backed, the guide would teach salespeople to overclaim. Base first, then a story tool on backed claims. Try the two buttons.", "Zuerst freigegeben, aber mit nur zu 75 % belegten Aussagen würde der Leitfaden Vertriebsmitarbeitenden beibringen, zu übertreiben. Zuerst die Basis, dann ein Story-Tool auf belegten Aussagen. Probieren Sie die beiden Schaltflächen."),
+      look: tt("the backing note under the guide", "den Belegvermerk unter dem Leitfaden"),
+      apply: () => {
+        setMeasFirstRaw(true);
+        setReadyRaw(false);
+      },
+    },
+  ]);
+  const setMeasFirst = (v: boolean) => {
+    story.leave();
+    setMeasFirstRaw(v);
+  };
+  const setReady = (v: boolean) => {
+    story.leave();
+    setReadyRaw(v);
+  };
+  const dataPct = ready ? 90 : 75;
+  const dataOk = dataPct >= 80;
   return (
     <div className="space-y-3">
-      <svg viewBox="0 0 560 170" className="mx-auto h-auto w-full max-w-[600px]" role="img" aria-labelledby={`${uid}-t ${uid}-d`}>
-        <title id={`${uid}-t`}>{tt("Neisse's three funded items by start month", "Die drei finanzierten Punkte von Neisse nach Startmonat")}</title>
-        <desc id={`${uid}-d`}>{I_ARCH.map((a) => `${a.name}: ${a.start}`).join(". ")}</desc>
-        {[1, 2, 3, 4].map((m) => (
-          <text key={m} x={X(m) + 37} y="14" textAnchor="middle" fontSize="11.5" fill={C.ash}>{`M${m}`}</text>
-        ))}
-        {I_ARCH.map((a, i) => {
-          const y = 24 + i * 44;
-          const on = a.id === sel;
-          return (
-            <g key={a.id} className="hit" role="button" tabIndex={0} aria-label={a.name} onClick={() => setSel(a.id)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSel(a.id)}>
-              <text x="4" y={y + 22} fontSize="12" fontWeight={on ? 800 : 600} fill={C.ink}>{a.name.length > 36 ? `${a.name.slice(0, 35)}…` : a.name}</text>
-              {[1, 2, 3, 4].map((m) => (
-                <rect key={m} className={m === a.start ? "hit-shape" : undefined} x={X(m) + 2} y={y + 6} width="72" height="24" rx="3" fill={m === a.start ? C.data : m > a.start ? C.tealSoft : C.paper} stroke={on && m === a.start ? C.amber : C.line} strokeWidth={on && m === a.start ? 2.5 : 1} />
-              ))}
-            </g>
-          );
-        })}
-      </svg>
+      <ThePoint>{tt("An architecture is built in order: the base first (the approved stories and the KPIs), then the proof, then the story tools. Where a link in that chain is missing, the tool above it cannot be trusted.", "Eine Architektur wird der Reihe nach gebaut: zuerst die Basis (die freigegebenen Storys und die KPIs), dann der Beleg, dann die Story-Tools. Wo ein Glied dieser Kette fehlt, lässt sich dem Werkzeug darüber nicht trauen.")}</ThePoint>
+      <Story steps={story.plan} step={story.step} onStep={story.go} />
+      <div role="group" aria-label={tt("Neisse's story guide and its base", "Der Story-Leitfaden von Neisse und seine Basis")} className="mx-auto max-w-xl">
+        <div className="rounded-lg border border-dashed border-line bg-canvas px-3 py-1.5 text-center text-caption text-ash">{tt("What customers meet: the first call", "Was Kunden erleben: das Erstgespräch")}</div>
+        <div className="my-1 flex h-7 items-center justify-center" aria-hidden />
+        <div className={clsx("rounded-lg border p-2 text-caption leading-snug", "border-signal bg-signalSoft")}>
+          <p className="font-semibold text-ink">{tt("Conversation guide for security-oriented customers", "Gesprächsleitfaden für sicherheitsorientierte Kunden")}</p>
+          <p className="text-ash">{tt(measFirst ? "Starts in month 1" : "Starts in month 1, before the base", measFirst ? "Startet in Monat 1" : "Startet in Monat 1, vor der Basis")}</p>
+          {!measFirst && <p className="text-accent">{tt("no approved story to tell and nothing measures it yet", "noch keine freigegebene Story zum Erzählen, und nichts misst ihn")}</p>}
+          {!dataOk && <p className="text-accent">{tt(`its claims are ${dataPct}% backed, below 80%, when it starts`, `seine Aussagen sind zu ${dataPct} % belegt, unter 80 %, wenn er startet`)}</p>}
+        </div>
+        <div className={clsx("flex h-7 items-center justify-center gap-2 text-micro normal-case tracking-normal", measFirst ? "text-ash" : "text-accent")}>
+          <span aria-hidden className={clsx("block h-full w-0 border-l-[3px]", measFirst ? "border-solid border-signal" : "border-dashed border-gold")} />
+          <span>{measFirst ? tt("tells approved stories", "erzählt freigegebene Storys") : tt("no approved story to tell", "keine freigegebene Story zum Erzählen")}</span>
+        </div>
+        <div className="rounded-lg border border-signal bg-signalSoft p-2 text-caption leading-snug">
+          <p className="font-semibold text-ink">{tt("Approved story library and KPIs", "Freigegebene Story-Bibliothek und KPIs")}</p>
+          <p className="text-ash">{measFirst ? tt("Starts in month 1", "Startet in Monat 1") : tt("Starts in month 3, after the guide", "Startet in Monat 3, nach dem Leitfaden")}</p>
+        </div>
+        <div className="flex h-7 items-center justify-center gap-2 text-micro normal-case tracking-normal text-ash">
+          <span aria-hidden className="block h-full w-0 border-l-[3px] border-solid border-signal" />
+          <span>{tt("real customer cases flow up", "Echte Kundenfälle fließen nach oben")}</span>
+        </div>
+        <div className="rounded-lg border border-dashed border-line bg-canvas px-3 py-1.5 text-center text-caption text-ash">{tt(`Where the proof lives: customer cases and the CRM, ${dataPct}% of what the guide tells is backed`, `Wo der Beleg liegt: Kundenfälle und CRM, ${dataPct} % dessen, was der Leitfaden erzählt, sind belegt`)}</div>
+      </div>
       <div className="space-y-1.5">
-        <p className="smallcaps">{tt("Read one item", "Einen Punkt lesen")}</p>
-        <Toggles<string> label={tt("Item", "Punkt")} value={sel} onChange={setSel} options={I_ARCH.map((a) => ({ id: a.id, label: a.name }))} />
+        <p className="smallcaps">{tt("Two things to change", "Zwei Dinge zum Ändern")}</p>
+        <Toggles<string> label={tt("The approved stories start", "Die freigegebenen Storys starten")} value={measFirst ? "first" : "after"} onChange={(v) => setMeasFirst(v === "first")} options={[{ id: "first", label: tt("Before the guide", "Vor dem Leitfaden") }, { id: "after", label: tt("After the guide", "Nach dem Leitfaden") }]} />
+        <Toggles<string> label={tt("Claims behind the guide", "Aussagen hinter dem Leitfaden")} value={ready ? "ready" : "weak"} onChange={(v) => setReady(v === "ready")} options={[{ id: "ready", label: tt("90% backed", "90 % belegt") }, { id: "weak", label: tt("75% backed", "75 % belegt") }]} />
       </div>
-      <div className="rounded-lg border border-line bg-paper p-3.5 text-caption" aria-live="polite">
-        <p className="smallcaps">{r.name}</p>
-        <p className="mt-1">
-          <span className="font-semibold text-ink">Owner. </span>
-          {r.owner}
-        </p>
-        <p className="mt-1">
-          <span className="font-semibold text-ink">Trigger. </span>
-          <Gloss>{r.trigger}</Gloss>
-        </p>
-        <p className="mt-1 text-ash">{r.why}</p>
-      </div>
-      <Insight>
-        {tt("The story library starts first, together with the story field in the CRM, because the training tells these stories and the field measures which one wins. The training waits for approved stories. Each item has one owner who can change it alone and a trigger with a number, a date and an action. Neisse left out a celebrity campaign on purpose: it would have been ready only after twelve weeks, and it speaks to status for everyone instead of the customer's own situation.", "Die Story-Bibliothek startet zuerst, zusammen mit dem Story-Feld im CRM, weil das Training diese Storys erzählt und das Feld misst, welche gewinnt. Das Training wartet auf freigegebene Storys. Jeder Punkt hat einen Owner, der ihn allein ändern kann, und einen Trigger mit Zahl, Datum und Aktion. Neisse hat eine Kampagne mit einem Prominenten bewusst weggelassen: Sie wäre erst nach zwölf Wochen fertig gewesen, und sie spricht Status für alle an statt die eigene Lage des Kunden.")}
+      <Insight>{plain()}
+        {measFirst && dataOk
+          ? tt("The base exists before the tool and the tool runs on claims that are backed. Neisse can say whether the guide helps, and it does not teach overclaiming. This is what a plan that holds looks like.", "Die Basis steht vor dem Werkzeug, und das Werkzeug läuft auf belegten Aussagen. Neisse kann sagen, ob der Leitfaden hilft, und er bringt kein Übertreiben bei. So sieht ein Plan aus, der hält.")
+          : !measFirst
+            ? tt("The guide starts before any story is approved. Its link to the base is dashed: Neisse would pay for a tool and never know whether it works. The fix is the order: the approved stories and KPIs first.", "Der Leitfaden startet, bevor eine Story freigegeben ist. Seine Verbindung zur Basis ist gestrichelt: Neisse würde für ein Werkzeug zahlen und nie wissen, ob es wirkt. Die Lösung ist die Reihenfolge: zuerst freigegebene Storys und KPIs.")
+            : tt("It tells approved stories, but its claims are only 75% backed, below the 80% a story tool should start on. It would teach overclaiming. The fix is to back the claims first, or to hold the tool back until they are.", "Er erzählt freigegebene Storys, aber seine Aussagen sind nur zu 75 % belegt, unter den 80 %, auf denen ein Story-Tool starten sollte. Er würde Übertreiben beibringen. Die Lösung ist, zuerst die Aussagen zu belegen oder das Werkzeug zurückzuhalten, bis sie es sind.")}
       </Insight>
     </div>
   );
