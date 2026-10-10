@@ -44,7 +44,7 @@ export function Block11() {
       minutes={BLOCK_MINUTES["1.1"]}
       findIt={tt("Route 1 → Task 1 → the nine sentences on the sort board below, from two recorded sales conversations: A focuses on technical details, B on benefit and story. Answer on the sort board.", "Route 1 → Task 1 → die neun Sätze auf der Sortiertafel unten, aus zwei aufgezeichneten Vertriebsgesprächen: A konzentriert sich auf technische Details, B auf Nutzen und Story. Antworten Sie auf der Sortiertafel.")}
     >
-      <MaterialRefs refs={["A1", "A2", "A3"]} />
+      <MaterialRefs refs={["A2"]} />
       <PlacementBoard<LevelTag>
         items={LINES.map((r) => ({ id: r.id, meta: r.source, text: r.text }))}
         bins={LEVEL_TAGS.map((t) => ({ id: t.id, label: t.label, hint: t.hint }))}
@@ -68,9 +68,9 @@ export function Block11() {
         noun={tt("sentence", "Satz")}
         intro={tt("Drag a sentence onto what it is, or select it and then select a kind. Select a placed one to move it again. One kind per sentence: feature, benefit or story.", "Ziehen Sie einen Satz auf das, was er ist, oder wählen Sie ihn aus und dann eine Art. Wählen Sie einen platzierten, um ihn zu verschieben. Eine Art pro Satz: Feature, Nutzen oder Story.")}
         tests={
-          <RevealHint id="sort-tests" label={tt("Show the test questions", "Testfragen zeigen")} title={tt("Test questions · taught in Materi A1 to A3", "Testfragen · aus Materi A1 bis A3")}>
+          <RevealHint id="sort-tests" label={tt("Show the test questions", "Testfragen zeigen")} title={tt("Test questions · taught in Materi A2", "Testfragen · aus Materi A2")}>
             <div className="space-y-2 text-caption text-ink">
-              <p>{tt("Ask these of every sentence. They repeat the tests from Materi A1 and A2; they never say which sentence goes where.", "Stellen Sie diese Fragen zu jedem Satz. Sie wiederholen die Tests aus Materi A1 und A2; sie sagen nie, welcher Satz wohin gehört.")}</p>
+              <p>{tt("Ask these of every sentence. They repeat the tests from Materi A2; they never say which sentence goes where.", "Stellen Sie diese Fragen zu jedem Satz. Sie wiederholen die Tests aus Materi A2; sie sagen nie, welcher Satz wohin gehört.")}</p>
               <ul className="space-y-1.5">
                 {LEVEL_TESTS.map((c) => (
                   <li key={c.name}>
@@ -79,7 +79,7 @@ export function Block11() {
                   </li>
                 ))}
               </ul>
-              <MaterialRefs refs={["A2", "A3"]} lead={tt("Taught in", "Gelehrt in")} />
+              <MaterialRefs refs={["A2"]} lead={tt("Taught in", "Gelehrt in")} />
             </div>
           </RevealHint>
         }
@@ -97,7 +97,7 @@ export function Block11() {
           id="extra-insight-kit"
           refs={[
             { label: tt("What the customers say (the case)", "Was die Kunden sagen (der Fall)"), value: tt("they do not understand the benefit, offers look interchangeable, few offers close", "sie verstehen den Nutzen nicht, Angebote wirken austauschbar, wenige Angebote schließen ab"), target: "case-brief" },
-            { label: tt("The three kinds of sentence (Materi A1 and A2)", "Die drei Arten von Sätzen (Materi A1 und A2)"), value: tt("feature · benefit · story", "Feature · Nutzen · Story"), target: "mat-A2" },
+            { label: tt("The three kinds of sentence (Materi A2)", "Die drei Arten von Sätzen (Materi A2)"), value: tt("feature · benefit · story", "Feature · Nutzen · Story"), target: "mat-A2" },
             { label: tt("The nine sentences above", "Die neun Sätze oben"), value: tt("conversation A is technical, conversation B uses benefit and story", "Gespräch A ist technisch, Gespräch B nutzt Nutzen und Story"), target: IDS.line(LINES[0].id) },
           ]}
           steps={[
@@ -234,7 +234,7 @@ export function Block13() {
       id="block-1-3"
       title={tt("Block 1.3 · Customer types, and three improvements for conversation A", "Block 1.3 · Kundentypen, und drei Verbesserungen für Gespräch A")}
       kind="OBJECTIVE + JUDGED"
-      core
+      core={false}
       minutes={BLOCK_MINUTES["1.3"]}
       findIt={tt("Route 1 → Task 1 → the table “Eight prospects” below: deal size, the share of their questions about details and risks, whether they compare several offers, and what they talk about most. Answer in the two lists and the three fields under it.", "Route 1 → Task 1 → die Tabelle „Acht Interessenten“ unten: Auftragsgröße, der Anteil ihrer Fragen zu Details und Risiken, ob sie mehrere Angebote vergleichen, und worüber sie am meisten sprechen. Antworten Sie in den zwei Listen und den drei Feldern darunter.")}
     >

@@ -13,13 +13,13 @@ export type TaskBlockId = "b11" | "b12" | "b13" | "b14" | "b21" | "b22" | "b23" 
 
 /**
  * Blocks that deepen or repeat a skill a Core block already teaches (CLAUDE.md #35). Collapsed by default via OptionalSection, never
- * removed (#6), never required by the missing list or the dossier ring. Route 1: Core 1.1, 1.3, 2.1 and 2.4 (four at most); Optional 1.2,
- * 1.4, 2.2 and 2.3. Route 2 ("decide an emotional sales strategy under unclear customer reactions", CLAUDE.md #47): one frame with two Core
+ * removed (#6), never required by the missing list or the dossier ring. Route 1: two Core blocks, one per level (1.1 for Level 1 with card A2, 2.4 for Level 2 with card A7);
+ * Optional 1.2, 1.3, 1.4, 2.1, 2.2 and 2.3. Route 2 ("decide an emotional sales strategy under unclear customer reactions", CLAUDE.md #47): one frame with two Core
  * steps. Step A (block 3.5: the target vision and the prioritised implementation architecture, with the story library and KPIs seen in the
  * Measurable bar) and Step B (block 3.6: the communication decision despite unclear customer reactions, with its reason and what to watch).
  * Optional 3.1 to 3.4 ("Go deeper"): self-contained, never read by the frame. The README says which plan item each block answers.
  */
-export const OPTIONAL_BLOCKS: TaskBlockId[] = ["b12", "b14", "b22", "b23", "b31", "b32", "b33", "b34"];
+export const OPTIONAL_BLOCKS: TaskBlockId[] = ["b12", "b13", "b14", "b21", "b22", "b23", "b31", "b32", "b33", "b34"];
 export const isOptionalBlock = (b: TaskBlockId) => (OPTIONAL_BLOCKS as string[]).includes(b);
 const len = (t: string) => t.trim().length;
 export const MIN_SENTENCE = 40;
